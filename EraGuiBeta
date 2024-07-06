@@ -1,1 +1,2502 @@
+--services 
+local players = game:GetService("Players")
+local tweenService = game:GetService("TweenService")
+local uis = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local coreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 
+
+--vars
+local lp = players.LocalPlayer
+local mouse = lp:GetMouse()
+local viewport = workspace.CurrentCamera.ViewportSize
+local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+
+local EraLibrary = {}
+
+local function AddDraggingFunctionality(DragPoint, Main)
+	pcall(function()
+		local Dragging, DragInput, MousePos, FramePos = false,false,false,false
+		DragPoint.InputBegan:Connect(function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+				Dragging = true
+				MousePos = Input.Position
+				FramePos = Main.Position
+
+				Input.Changed:Connect(function()
+					if Input.UserInputState == Enum.UserInputState.End then
+						Dragging = false
+					end
+				end)
+			end
+		end)
+		DragPoint.InputChanged:Connect(function(Input)
+			if Input.UserInputType == Enum.UserInputType.MouseMovement then
+				DragInput = Input
+			end
+		end)
+		uis.InputChanged:Connect(function(Input)
+			if Input == DragInput and Dragging then
+				local Delta = Input.Position - MousePos
+				tweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position  = UDim2.new(FramePos.X.Scale,FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
+			end
+		end)
+	end)
+end
+
+
+
+function EraLibrary:validate(defaults, options)
+	for i, v in pairs(defaults) do
+		if options[i] == nil then
+			options[i] = v
+		end
+	end
+	return options
+end
+
+function EraLibrary:tween(objects, goal, callback)
+	local tween = tweenService:Create(objects, tweenInfo, goal)
+	tween.Completed:Connect(callback or function() end)
+	tween:Play()
+end
+
+function EraLibrary:CreateWin(options)
+	options = EraLibrary:validate({
+		name = "Era Hub",
+		version = "v1.0.0",
+		game = "GAME",
+		webhook = "",
+		key = ""
+	}, options or {})
+	
+	local EraGui = {
+		CurrentTab = nil,
+		Openned = true,
+		Minimized = false,
+	}
+	
+	function EraLibrary:NotifyErrors(errors)
+		print("detected some error from user! ".. errors)
+		
+	end
+	
+	if options.key ~= "yahvWYanvaJ" then
+		game.Players.LocalPlayer:Kick("cic stop stealing gui")
+	end
+	
+	--main frame
+	
+	do
+		-- StarterEraGui.EraHubEraGui
+		EraGui["1"] = Instance.new("ScreenGui", runService:IsStudio() and players.LocalPlayer:WaitForChild("PlayerGui") or coreGui);
+		EraGui["1"]["IgnoreGuiInset"] = true;
+		EraGui["1"]["Name"] = [[EraHub]];
+		EraGui["1"]["ResetOnSpawn"] = false;
+
+		-- StarterEraGui.EraHubEraGui.main
+		EraGui["2"] = Instance.new("Frame", EraGui["1"]);
+		EraGui["2"]["BorderSizePixel"] = 1;
+		EraGui["2"]["BackgroundColor3"] = Color3.fromRGB(26, 26, 26);
+		EraGui["2"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+		EraGui["2"]["Size"] = UDim2.new(0, 530, 0, 330);
+		EraGui["2"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+		EraGui["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["2"]["Name"] = [[main]];
+		
+		
+		EraGui["222"] = Instance.new("Frame", EraGui["2"])
+		EraGui["222"]["BackgroundTransparency"] = 1
+		EraGui["222"]["Size"] = UDim2.new(0, 527,0, 25)
+		EraGui["222"]["Position"] = UDim2.new(0.502, 0,-0.012, 0)
+		EraGui["222"]["AnchorPoint"] = Vector2.new(0.5, 0.05)	
+			
+		-- StarterEraGui.EraHubEraGui.main.Title
+		EraGui["3"] = Instance.new("TextLabel", EraGui["2"]);
+		EraGui["3"]["TextWrapped"] = true;
+		EraGui["3"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+		EraGui["3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["3"]["TextSize"] = 12;
+		EraGui["3"]["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+		EraGui["3"]["TextColor3"] = Color3.fromRGB(235, 235, 235);
+		EraGui["3"]["BackgroundTransparency"] = 1;
+		EraGui["3"]["RichText"] = true;
+		EraGui["3"]["Size"] = UDim2.new(1, -100, 0.0129, 12);
+		EraGui["3"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+		EraGui["3"]["Text"] = options.name.. " ".. [[<font size="10" color="#aaa">]].. options.version.. [[</font>]];
+		EraGui["3"]["Name"] = [[Title]];
+
+		-- StarterEraGui.EraHubEraGui.main.Title.UIPadding
+		EraGui["4"] = Instance.new("UIPadding", EraGui["3"]);
+		EraGui["4"]["PaddingLeft"] = UDim.new(0, 2);
+
+		-- StarterEraGui.EraHubEraGui.main.MainUICorner
+		EraGui["5"] = Instance.new("UICorner", EraGui["2"]);
+		EraGui["5"]["Name"] = [[MainUICorner]];
+		EraGui["5"]["CornerRadius"] = UDim.new(0, 4);
+
+		-- StarterEraGui.EraHubEraGui.main.MinMaxBtn
+		EraGui["6"] = Instance.new("ImageButton", EraGui["2"]);
+		EraGui["6"]["BackgroundColor3"] = Color3.fromRGB(48, 48, 48);
+		EraGui["6"]["AutoButtonColor"] = false
+		EraGui["6"]["AnchorPoint"] = Vector2.new(1, 0);
+		EraGui["6"]["Size"] = UDim2.new(0, 20, 0, 20);
+		EraGui["6"]["Position"] = UDim2.new(1, -30, 0, 0);
+		EraGui["6"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+		EraGui["6"]["Name"] = [[MinMaxBtn]];
+		EraGui["6"]["Active"] = false
+
+		-- StarterEraGui.EraHubEraGui.main.MinMaxBtn.UICorner
+		EraGui["7"] = Instance.new("UICorner", EraGui["6"]);
+		EraGui["7"]["CornerRadius"] = UDim.new(0, 4);
+
+		-- StarterEraGui.EraHubEraGui.main.MinMaxBtn.MinimizeMaximize
+		EraGui["8"] = Instance.new("ImageLabel", EraGui["6"]);
+		EraGui["8"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["8"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+		EraGui["8"]["Image"] = [[rbxassetid://17733198808]];
+		EraGui["8"]["Size"] = UDim2.new(0, 12, 0, 12);
+		EraGui["8"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+		EraGui["8"]["BackgroundTransparency"] = 1;
+		EraGui["8"]["Name"] = [[MinimizeMaximize]];
+		EraGui["8"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+		-- StarterEraGui.EraHubEraGui.main.ExitBtn
+		EraGui["9"] = Instance.new("ImageButton", EraGui["2"]);
+		EraGui["9"]["BackgroundColor3"] = Color3.fromRGB(255, 81, 81);
+		EraGui["9"]["AnchorPoint"] = Vector2.new(1, 0);
+		EraGui["9"]["Size"] = UDim2.new(0, 20, 0, 20);
+		EraGui["9"]["Position"] = UDim2.new(1, 0, 0, 0);
+		EraGui["9"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+		EraGui["9"]["Name"] = [[ExitBtn]];
+		EraGui["9"]["Active"] = false
+		EraGui["9"]["AutoButtonColor"] = false
+
+		-- StarterEraGui.EraHubEraGui.main.ExitBtn.UICorner
+		EraGui["a"] = Instance.new("UICorner", EraGui["9"]);
+		EraGui["a"]["CornerRadius"] = UDim.new(0, 4);
+
+		-- StarterEraGui.EraHubEraGui.main.ExitBtn.CloseIcon
+		EraGui["b"] = Instance.new("ImageLabel", EraGui["9"]);
+		EraGui["b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["b"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+		EraGui["b"]["Image"] = [[rbxassetid://11160441455]];
+		EraGui["b"]["Size"] = UDim2.new(0, 12, 0, 12);
+		EraGui["b"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+		EraGui["b"]["BackgroundTransparency"] = 1;
+		EraGui["b"]["Name"] = [[CloseIcon]];
+		EraGui["b"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+		-- StarterEraGui.EraHubEraGui.main.MainUIPadding
+		EraGui["20"] = Instance.new("UIPadding", EraGui["2"]);
+		EraGui["20"]["PaddingTop"] = UDim.new(0, 5);
+		EraGui["20"]["PaddingRight"] = UDim.new(0, 4);
+		EraGui["20"]["Name"] = [[MainUIPadding]];
+		EraGui["20"]["PaddingLeft"] = UDim.new(0, 4);
+		EraGui["20"]["PaddingBottom"] = UDim.new(0, 10);
+
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer
+		EraGui["21"] = Instance.new("Frame", EraGui["2"]);
+		EraGui["21"]["BorderSizePixel"] = 0;
+		EraGui["21"]["BackgroundColor3"] = Color3.fromRGB(36, 36, 36);
+		EraGui["21"]["Size"] = UDim2.new(0.80866, 0, 0.96, 0);
+		EraGui["21"]["Position"] = UDim2.new(0.199, 0, 0.073, 0);
+		EraGui["21"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["21"]["Name"] = [[ContentContainer]];
+
+		
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer.Settings
+		EraGui["b9"] = Instance.new("Frame", EraGui["21"]);
+		EraGui["b9"]["Visible"] = false;
+		EraGui["b9"]["ZIndex"] = 2;
+		EraGui["b9"]["BorderSizePixel"] = 0;
+		EraGui["b9"]["BackgroundColor3"] = Color3.fromRGB(46, 46, 46);
+		EraGui["b9"]["Size"] = UDim2.new(1, 0, 1, 0);
+		EraGui["b9"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["b9"]["Name"] = [[Settings]];
+
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer.Settings.BackButton
+		EraGui["ba"] = Instance.new("TextLabel", EraGui["b9"]);
+		EraGui["ba"]["TextWrapped"] = true;
+		EraGui["ba"]["BorderSizePixel"] = 0;
+		EraGui["ba"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["ba"]["TextSize"] = 16;
+		EraGui["ba"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+		EraGui["ba"]["TextColor3"] = Color3.fromRGB(173, 173, 173);
+		EraGui["ba"]["BackgroundTransparency"] = 1;
+		EraGui["ba"]["Size"] = UDim2.new(0, 50, 0, 20);
+		EraGui["ba"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["ba"]["Text"] = [[<- Back]];
+		EraGui["ba"]["Name"] = [[BackButton]];
+
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer.Settings.SettingsHolder
+		EraGui["bb"] = Instance.new("ScrollingFrame", EraGui["b9"]);
+		EraGui["bb"]["Active"] = true;
+		EraGui["bb"]["BorderSizePixel"] = 0;
+		EraGui["bb"]["CanvasSize"] = UDim2.new(0, 0, 0, 0);
+		EraGui["bb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["bb"]["Name"] = [[SettingsHolder]];
+		EraGui["bb"]["Size"] = UDim2.new(0.01924, 364, 1, 0);
+		EraGui["bb"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["bb"]["Position"] = UDim2.new(0.11805, 0, 0.00014, 0);
+		EraGui["bb"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["bb"]["BackgroundTransparency"] = 1;
+
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer.Settings.SettingsHolder.UIListLayout
+		EraGui["bc"] = Instance.new("UIListLayout", EraGui["bb"]);
+		EraGui["bc"]["Padding"] = UDim.new(0, 6);
+		EraGui["bc"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer.Settings.SettingsHolder.MainUIPadding
+		EraGui["bd"] = Instance.new("UIPadding", EraGui["bb"]);
+		EraGui["bd"]["PaddingTop"] = UDim.new(0, 12);
+		EraGui["bd"]["PaddingRight"] = UDim.new(0, 3);
+		EraGui["bd"]["Name"] = [[MainUIPadding]];
+		EraGui["bd"]["PaddingLeft"] = UDim.new(0, 3);
+		EraGui["bd"]["PaddingBottom"] = UDim.new(0, 5);
+
+		-- StarterEraGui.EraHubEraGui.main.ContentContainer.UICorner
+		EraGui["be"] = Instance.new("UICorner", EraGui["21"]);
+		EraGui["be"]["CornerRadius"] = UDim.new(0, 4);
+
+		-- StarterEraGui.EraHubEraGui.main.neonShadows
+		EraGui["bf"] = Instance.new("ImageLabel", EraGui["2"]);
+		EraGui["bf"]["ZIndex"] = 0;
+		EraGui["bf"]["SliceCenter"] = Rect.new(24, 24, 280, 280);
+		EraGui["bf"]["ScaleType"] = Enum.ScaleType.Slice;
+		EraGui["bf"]["ImageColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["bf"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+		EraGui["bf"]["Image"] = [[rbxassetid://5028857084]];
+		EraGui["bf"]["Size"] = UDim2.new(1.016, 30,1.046, 30);
+		EraGui["bf"]["BackgroundTransparency"] = 1;
+		EraGui["bf"]["Name"] = [[neonShadows]];
+		EraGui["bf"]["Position"] = UDim2.new(0.50096, 0, 0.50852, 0);
+
+		-- StarterEraGui.EraHubEraGui.main.ColorPickers
+		EraGui["c0"] = Instance.new("Folder", EraGui["2"]);
+		EraGui["c0"]["Name"] = [[ColorPickers]];
+	end
+	
+	--navigation
+	
+	do
+		-- StarterEraGui.EraHubEraGui.main.Navigation
+		EraGui["c"] = Instance.new("Frame", EraGui["2"]);
+		EraGui["c"]["BorderSizePixel"] = 0;
+		EraGui["c"]["BackgroundColor3"] = Color3.fromRGB(36, 36, 36);
+		EraGui["c"]["ClipsDescendants"] = true;
+		EraGui["c"]["Size"] = UDim2.new(0.20666, 0, 0.96, 0);
+		EraGui["c"]["Position"] = UDim2.new(-0.00766, 0, 0, 23);
+		EraGui["c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["c"]["Name"] = [[Navigation]];
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.TabsHolder
+		EraGui["d"] = Instance.new("Frame", EraGui["c"]);
+		EraGui["d"]["BorderSizePixel"] = 0;
+		EraGui["d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["d"]["Size"] = UDim2.new(1, 0, 1, 0);
+		EraGui["d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["d"]["Name"] = [[TabsHolder]];
+		EraGui["d"]["BackgroundTransparency"] = 1;
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.TabsHolder.UIListLayout
+		EraGui["e"] = Instance.new("UIListLayout", EraGui["d"]);
+		EraGui["e"]["Padding"] = UDim.new(0, 8);
+		EraGui["e"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.TabsHolder.UIPadding
+		EraGui["f"] = Instance.new("UIPadding", EraGui["d"]);
+		EraGui["f"]["PaddingTop"] = UDim.new(0, 8);
+		EraGui["f"]["PaddingRight"] = UDim.new(0, 5);
+		EraGui["f"]["PaddingLeft"] = UDim.new(0, 5);
+		EraGui["f"]["PaddingBottom"] = UDim.new(0, 8);
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.BottomStatsHolder
+		EraGui["19"] = Instance.new("Frame", EraGui["c"]);
+		EraGui["19"]["BorderSizePixel"] = 0;
+		EraGui["19"]["BackgroundColor3"] = Color3.fromRGB(46, 46, 46);
+		EraGui["19"]["AnchorPoint"] = Vector2.new(1, 1);
+		EraGui["19"]["Size"] = UDim2.new(0.99807, 0, 0, 23);
+		EraGui["19"]["Position"] = UDim2.new(0.99807, 0, 1, 0);
+		EraGui["19"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["19"]["Name"] = [[BottomStatsHolder]];
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.BottomStatsHolder.nav1
+		EraGui["1a"] = Instance.new("Frame", EraGui["19"]);
+		EraGui["1a"]["BorderSizePixel"] = 0;
+		EraGui["1a"]["BackgroundColor3"] = Color3.fromRGB(46, 46, 46);
+		EraGui["1a"]["AnchorPoint"] = Vector2.new(0, 1);
+		EraGui["1a"]["Size"] = UDim2.new(1, 0, 0, 5);
+		EraGui["1a"]["Position"] = UDim2.new(0, 0, 0.2, 0);
+		EraGui["1a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["1a"]["Name"] = [[nav1]];
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.BottomStatsHolder.SettingsButton
+		EraGui["1b"] = Instance.new("ImageLabel", EraGui["19"]);
+		EraGui["1b"]["BorderSizePixel"] = 0;
+		EraGui["1b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["1b"]["ImageColor3"] = Color3.fromRGB(231, 231, 231);
+		EraGui["1b"]["AnchorPoint"] = Vector2.new(1, 0.5);
+		EraGui["1b"]["Image"] = [[http://www.roblox.com/asset/?id=18261861440]];
+		EraGui["1b"]["Size"] = UDim2.new(0, 20, 0, 20);
+		EraGui["1b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["1b"]["BackgroundTransparency"] = 1;
+		EraGui["1b"]["Name"] = [[SettingsButton]];
+		EraGui["1b"]["Position"] = UDim2.new(0.98, 0, 0.5, 0);
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.BottomStatsHolder.GameName
+		EraGui["1c"] = Instance.new("TextLabel", EraGui["19"]);
+		EraGui["1c"]["TextWrapped"] = true;
+		EraGui["1c"]["TextTruncate"] = Enum.TextTruncate.AtEnd;
+		EraGui["1c"]["BorderSizePixel"] = 0;
+		EraGui["1c"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+		EraGui["1c"]["TextYAlignment"] = Enum.TextYAlignment.Bottom;
+		EraGui["1c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+		EraGui["1c"]["TextSize"] = 10;
+		EraGui["1c"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+		EraGui["1c"]["TextColor3"] = Color3.fromRGB(137, 137, 137);
+		EraGui["1c"]["BackgroundTransparency"] = 1;
+		EraGui["1c"]["RichText"] = true;
+		EraGui["1c"]["Size"] = UDim2.new(0.8, 0, 0.8, 0);
+		EraGui["1c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["1c"]["Text"] = options.game;
+		EraGui["1c"]["Name"] = [[GameName]];
+		EraGui["1c"]["Position"] = UDim2.new(0.02, 0, 0.2, 0);
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.BottomStatsHolder.UICorner
+		EraGui["1d"] = Instance.new("UICorner", EraGui["19"]);
+		EraGui["1d"]["CornerRadius"] = UDim.new(0, 4);
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.line1
+		EraGui["1e"] = Instance.new("Frame", EraGui["c"]);
+		EraGui["1e"]["ZIndex"] = 2;
+		EraGui["1e"]["BorderSizePixel"] = 0;
+		EraGui["1e"]["BackgroundColor3"] = Color3.fromRGB(46, 46, 46);
+		EraGui["1e"]["AnchorPoint"] = Vector2.new(0, 1);
+		EraGui["1e"]["Size"] = UDim2.new(0, 5, 1, 0);
+		EraGui["1e"]["Position"] = UDim2.new(0.98, 0, 1, 0);
+		EraGui["1e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+		EraGui["1e"]["Name"] = [[line1]];
+
+		-- StarterEraGui.EraHubEraGui.main.Navigation.UICorner
+		EraGui["1f"] = Instance.new("UICorner", EraGui["c"]);
+		EraGui["1f"]["CornerRadius"] = UDim.new(0, 4);
+	end
+	
+	
+	--Tabs
+	
+	function EraGui:CreateTab(options)
+		options = EraLibrary:validate({
+			name = "No name",
+			tabtype = "center"
+		}, options or {})
+		
+		local Tab = {
+			Hover = false,
+			Active = false
+		}
+		
+		--Render
+		
+		do
+			-- StarterGui.EraHubGui.main.Navigation.TabsHolder.InactiveTab
+			Tab["16"] = Instance.new("TextLabel", EraGui["d"]);
+			Tab["16"]["BorderSizePixel"] = 0;
+			Tab["16"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+			Tab["16"]["TextSize"] = 14;
+			Tab["16"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Bold, Enum.FontStyle.Normal);
+			Tab["16"]["TextColor3"] = Color3.fromRGB(169, 169, 169);
+			Tab["16"]["BackgroundTransparency"] = 1;
+			Tab["16"]["RichText"] = true;
+			Tab["16"]["Size"] = UDim2.new(1, 0, 0, 25);
+			Tab["16"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+			Tab["16"]["Text"] = options.name;
+			Tab["16"]["Name"] = [[InactiveTab]];
+
+			-- StarterGui.EraHubGui.main.Navigation.TabsHolder.InactiveTab.line2
+			Tab["17"] = Instance.new("Frame", Tab["16"]);
+			Tab["17"]["BorderSizePixel"] = 0;
+			Tab["17"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+			Tab["17"]["AnchorPoint"] = Vector2.new(0.5, 0);
+			Tab["17"]["Size"] = UDim2.new(1, 0, 0, 2);
+			Tab["17"]["Position"] = UDim2.new(0.5, 0, 1, 0);
+			Tab["17"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+			Tab["17"]["Name"] = [[line2]];
+
+			-- StarterGui.EraHubGui.main.Navigation.TabsHolder.InactiveTab.line2.UIGradient
+			Tab["18"] = Instance.new("UIGradient", Tab["17"]);
+			Tab["18"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(35, 35, 35)),ColorSequenceKeypoint.new(0.150, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(125, 125, 125)),ColorSequenceKeypoint.new(0.850, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(36, 36, 36))};
+			
+			-- StarterEraGui.EraHubEraGui.main.ContentContainer.HomeTab
+			Tab["22"] = Instance.new("ScrollingFrame", EraGui["21"]);
+			Tab["22"]["Active"] = false;
+			Tab["22"]["ScrollingDirection"] = Enum.ScrollingDirection.Y;
+			Tab["22"]["ZIndex"] = 2;
+			Tab["22"]["BorderSizePixel"] = 0;
+			Tab["22"]["CanvasSize"] = UDim2.new(0, 0, 0, 0);
+			Tab["22"]["CanvasPosition"] = Vector2.new(0, 13.59998);
+			Tab["22"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+			Tab["22"]["Name"] = [[HomeTab]];
+			Tab["22"]["ScrollBarImageTransparency"] = 1;
+			Tab["22"]["AutomaticCanvasSize"] = Enum.AutomaticSize.Y;
+			Tab["22"]["Size"] = UDim2.new(1, 0, 1, 0);
+			Tab["22"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+			Tab["22"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+			Tab["22"]["ScrollBarThickness"] = 0;
+			Tab["22"]["BackgroundTransparency"] = 1;
+
+			-- StarterEraGui.EraHubEraGui.main.ContentContainer.HomeTab.UIListLayout
+			Tab["23"] = Instance.new("UIListLayout", Tab["22"]);
+			Tab["23"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
+			Tab["23"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+			Tab["23"]["ItemLineAlignment"] = Enum.ItemLineAlignment.Center;
+			Tab["23"]["FillDirection"] = Enum.FillDirection.Horizontal;
+
+			-- StarterEraGui.EraHubEraGui.main.ContentContainer.HomeTab.MainUIPadding
+			Tab["24"] = Instance.new("UIPadding", Tab["22"]);
+			Tab["24"]["PaddingTop"] = UDim.new(0, 4);
+			Tab["24"]["PaddingRight"] = UDim.new(0, 4);
+			Tab["24"]["Name"] = [[MainUIPadding]];
+			Tab["24"]["PaddingLeft"] = UDim.new(0, 4);
+			Tab["24"]["PaddingBottom"] = UDim.new(0, 4);
+			
+			
+		end
+		
+		--Methods
+		
+		do
+			function Tab:Activate()
+				if not Tab.Active then 
+					if EraGui.CurrentTab ~= nil then
+						EraGui.CurrentTab:Deactivate()
+					end					
+
+					Tab.Active = true					
+					EraLibrary:tween(Tab["16"], {TextColor3 = Color3.fromRGB(255,255,255)})
+					Tab["18"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(0.000, Color3.fromRGB(35, 35, 35)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(255, 255, 255)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(35, 35, 35))};
+					Tab["22"].Visible = true
+					EraGui.CurrentTab = Tab
+				end
+			end
+
+			function Tab:Deactivate()
+				if Tab.Active then
+					Tab.Active = false
+					EraLibrary:tween(Tab["16"], {TextColor3 = Color3.fromRGB(169, 169, 169);})
+					Tab["18"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(35, 35, 35)),ColorSequenceKeypoint.new(0.150, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(125, 125, 125)),ColorSequenceKeypoint.new(0.850, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(36, 36, 36))};
+					Tab["22"].Visible = false
+				end
+			end
+
+		end
+		
+		--Logic
+		
+		do
+			Tab["16"].MouseEnter:Connect(function()
+				Tab.Hover = true
+
+				if not Tab.Active then
+					EraLibrary:tween(Tab["16"], {TextColor3 = Color3.fromRGB(223, 223, 223)})
+					Tab["18"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(36, 36, 36)),ColorSequenceKeypoint.new(0.100, Color3.fromRGB(47, 47, 47)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(214, 214, 214)),ColorSequenceKeypoint.new(0.900, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(35, 35, 35))};
+				end
+			end)
+
+			Tab["16"].MouseLeave:Connect(function()
+				Tab.Hover = false
+
+				if not Tab.Active then
+					EraLibrary:tween(Tab["16"], {TextColor3 = Color3.fromRGB(169, 169, 169);})
+					Tab["18"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(35, 35, 35)),ColorSequenceKeypoint.new(0.150, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(125, 125, 125)),ColorSequenceKeypoint.new(0.850, Color3.fromRGB(48, 48, 48)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(36, 36, 36))};
+				end
+			end)
+
+
+			uis.InputBegan:Connect(function(input, gpe)
+				if gpe then return end 
+
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then 
+					if Tab.Hover then 
+						Tab:Activate()
+					end
+				end
+			end)
+
+			if EraGui.CurrentTab == nil then
+				Tab:Activate()
+			end
+
+		end
+		
+		--SubTabs
+		
+		function Tab:CreateSubTab(options)
+			options = EraLibrary:validate({
+				tabtype = "center"
+			}, options or {})
+			
+			local SubTab = {}
+			
+			--render
+			
+			do
+				if options.tabtype == "center" then
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1
+					SubTab["25"] = Instance.new("Frame", Tab["22"]);
+					SubTab["25"]["ZIndex"] = 2;
+					SubTab["25"]["BorderSizePixel"] = 0;
+					SubTab["25"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					SubTab["25"]["Size"] = UDim2.new(1, 0, 1, 0);
+					SubTab["25"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					SubTab["25"]["Name"] = [[SubTabCenter]];
+					SubTab["25"]["BackgroundTransparency"] = 1;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.UIListLayout
+					SubTab["26"] = Instance.new("UIListLayout", SubTab["25"]);
+					SubTab["26"]["Padding"] = UDim.new(0, 6);
+					SubTab["26"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.MainUIPadding
+					SubTab["27"] = Instance.new("UIPadding", SubTab["25"]);
+					SubTab["27"]["PaddingTop"] = UDim.new(0, 0);
+					SubTab["27"]["PaddingRight"] = UDim.new(0, 10);
+					SubTab["27"]["Name"] = [[MainUIPadding]];
+					SubTab["27"]["PaddingLeft"] = UDim.new(0, 10);
+					SubTab["27"]["PaddingBottom"] = UDim.new(0, 5);
+				end
+
+				if options.tabtype == "left" then
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1
+					SubTab["25"] = Instance.new("Frame", Tab["22"]);
+					SubTab["25"]["ZIndex"] = 2;
+					SubTab["25"]["BorderSizePixel"] = 0;
+					SubTab["25"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					SubTab["25"]["Size"] = UDim2.new(0.5, 0, 1, 0);
+					SubTab["25"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					SubTab["25"]["Name"] = [[SubTabLeft]];
+					SubTab["25"]["BackgroundTransparency"] = 1;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.UIListLayout
+					SubTab["26"] = Instance.new("UIListLayout", SubTab["25"]);
+					SubTab["26"]["Padding"] = UDim.new(0, 6);
+					SubTab["26"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.MainUIPadding
+					SubTab["27"] = Instance.new("UIPadding", SubTab["25"]);
+					SubTab["27"]["PaddingTop"] = UDim.new(0, 0);
+					SubTab["27"]["PaddingRight"] = UDim.new(0, 10);
+					SubTab["27"]["Name"] = [[MainUIPadding]];
+					SubTab["27"]["PaddingLeft"] = UDim.new(0, 4);
+					SubTab["27"]["PaddingBottom"] = UDim.new(0, 5);
+				end
+
+				if options.tabtype == "right" then
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab2
+					SubTab["25"] = Instance.new("Frame", Tab["22"]);
+					SubTab["25"]["BorderSizePixel"] = 0;
+					SubTab["25"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					SubTab["25"]["AnchorPoint"] = Vector2.new(1, 0);
+					SubTab["25"]["Size"] = UDim2.new(0.5, 0, 1, 0);
+					SubTab["25"]["Position"] = UDim2.new(1, 0, 0, 0);
+					SubTab["25"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					SubTab["25"]["Name"] = [[SubTabRight]];
+					SubTab["25"]["BackgroundTransparency"] = 1;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab2.UIListLayout
+					SubTab["26"] = Instance.new("UIListLayout", SubTab["25"]);
+					SubTab["26"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Right;
+					SubTab["26"]["Padding"] = UDim.new(0, 6);
+					SubTab["26"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab2.MainUIPadding
+					SubTab["26"] = Instance.new("UIPadding", SubTab["25"]);
+					SubTab["26"]["PaddingTop"] = UDim.new(0, 0);
+					SubTab["26"]["PaddingRight"] = UDim.new(0, 4);
+					SubTab["26"]["Name"] = [[MainUIPadding]];
+					SubTab["26"]["PaddingLeft"] = UDim.new(0, 10);
+					SubTab["26"]["PaddingBottom"] = UDim.new(0, 5);
+				end
+			end	
+			
+			--functionality
+			
+			function SubTab:StartSection(options)
+				options = EraLibrary:validate({
+					text = "No Title"
+				}, options or {})
+				
+				local StartSection = {}
+				
+				-- Render
+				
+				do
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.StartSection
+					StartSection["79"] = Instance.new("Frame", SubTab["25"]);
+					StartSection["79"]["BorderSizePixel"] = 0;
+					StartSection["79"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					StartSection["79"]["Size"] = UDim2.new(1, 0, 0, 25);
+					StartSection["79"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					StartSection["79"]["Name"] = [[StartSection]];
+					StartSection["79"]["BackgroundTransparency"] = 1;
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.StartSection.Title
+					StartSection["7a"] = Instance.new("TextLabel", StartSection["79"]);
+					StartSection["7a"]["TextWrapped"] = true;
+					StartSection["7a"]["BorderSizePixel"] = 0;
+					StartSection["7a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					StartSection["7a"]["TextYAlignment"] = Enum.TextYAlignment.Top;
+					StartSection["7a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					StartSection["7a"]["TextSize"] = 14;
+					StartSection["7a"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					StartSection["7a"]["TextColor3"] = Color3.fromRGB(235, 235, 235);
+					StartSection["7a"]["BackgroundTransparency"] = 1;
+					StartSection["7a"]["RichText"] = true;
+					StartSection["7a"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					StartSection["7a"]["Size"] = UDim2.new(1, 0, 1, 0);
+					StartSection["7a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					StartSection["7a"]["Text"] = options.text;
+					StartSection["7a"]["Name"] = [[Title]];
+					StartSection["7a"]["Position"] = UDim2.new(0, 0, 0, 16);
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.StartSection.Line
+					StartSection["7b"] = Instance.new("Frame", StartSection["79"]);
+					StartSection["7b"]["BorderSizePixel"] = 0;
+					StartSection["7b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					StartSection["7b"]["Size"] = UDim2.new(0, 56, 0, 2);
+					StartSection["7b"]["Position"] = UDim2.new(-0.002, 0, 0.75, 0);
+					StartSection["7b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					StartSection["7b"]["Name"] = [[Line]];
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.StartSection.Line.UIGradient
+					StartSection["7c"] = Instance.new("UIGradient", StartSection["7b"]);
+					StartSection["7c"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(170, 170, 170)),ColorSequenceKeypoint.new(0.042, Color3.fromRGB(205, 205, 205)),ColorSequenceKeypoint.new(0.740, Color3.fromRGB(71, 71, 71)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(36, 36, 36))};
+				end
+				
+				--Methods 
+				
+				function StartSection:SetText(text)
+					options.text = text
+					StartSection:_update()
+				end
+				
+
+				function StartSection:_update()
+					StartSection["7a"].Text = options.text
+
+					
+					EraLibrary:tween(StartSection["7b"], {Size = UDim2.new(0, StartSection["7a"].TextBounds.X, 0 , 2)})
+				end
+				
+				StartSection:_update()
+				return StartSection
+			end
+			
+			function SubTab:SeparateSection(options)
+				options = EraLibrary:validate({
+					text = "No Text"
+				}, options or {})
+				
+				local SeparateSection = {};
+				
+				--Render
+				do
+					-- StarterSeparateSection.EraHubSeparateSection.main.ContentContainer.HomeTab.SubTab1.SeparateSection
+					SeparateSection["75"] = Instance.new("Frame", SubTab["25"]);
+					SeparateSection["75"]["BorderSizePixel"] = 0;
+					SeparateSection["75"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					SeparateSection["75"]["Size"] = UDim2.new(1, 0, 0, 30);
+					SeparateSection["75"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					SeparateSection["75"]["Name"] = [[SeparateSection]];
+					SeparateSection["75"]["BackgroundTransparency"] = 1;
+
+					-- StarterSeparateSection.EraHubSeparateSection.main.ContentContainer.HomeTab.SubTab1.SeparateSection.Title
+					SeparateSection["76"] = Instance.new("TextLabel", SeparateSection["75"]);
+					SeparateSection["76"]["TextWrapped"] = true;
+					SeparateSection["76"]["BorderSizePixel"] = 0;
+					SeparateSection["76"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					SeparateSection["76"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					SeparateSection["76"]["TextSize"] = 14;
+					SeparateSection["76"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					SeparateSection["76"]["TextColor3"] = Color3.fromRGB(235, 235, 235);
+					SeparateSection["76"]["BackgroundTransparency"] = 1;
+					SeparateSection["76"]["RichText"] = true;
+					SeparateSection["76"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					SeparateSection["76"]["Size"] = UDim2.new(1, 0, 1, 0);
+					SeparateSection["76"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					SeparateSection["76"]["Text"] = options.text;
+					SeparateSection["76"]["Name"] = [[Title]];
+					SeparateSection["76"]["Position"] = UDim2.new(0, 0, 0, 16);
+
+					-- StarterSeparateSection.EraHubSeparateSection.main.ContentContainer.HomeTab.SubTab1.SeparateSection.Line
+					SeparateSection["77"] = Instance.new("Frame", SeparateSection["75"]);
+					SeparateSection["77"]["BorderSizePixel"] = 0;
+					SeparateSection["77"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					SeparateSection["77"]["Size"] = UDim2.new(0, 136, 0, 2);
+					SeparateSection["77"]["Position"] = UDim2.new(0, -3, 0, 26);
+					SeparateSection["77"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					SeparateSection["77"]["Name"] = [[Line]];
+
+					-- StarterSeparateSection.EraHubSeparateSection.main.ContentContainer.HomeTab.SubTab1.SeparateSection.Line.UIGradient
+					SeparateSection["78"] = Instance.new("UIGradient", SeparateSection["77"]);
+					SeparateSection["78"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(36, 36, 36)),ColorSequenceKeypoint.new(0.120, Color3.fromRGB(71, 71, 71)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(205, 205, 205)),ColorSequenceKeypoint.new(0.880, Color3.fromRGB(71, 71, 71)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(36, 36, 36))};
+
+				end
+				
+				--Methods
+				do
+					function SeparateSection:SetText(text)
+						options.text = text
+						SeparateSection:_update()
+					end
+
+
+					function SeparateSection:_update()
+						SeparateSection["76"].Text = options.text
+
+
+						EraLibrary:tween(SeparateSection["77"], {Size = UDim2.new(0, SeparateSection["76"].TextBounds.X, 0 , 2)})
+					end
+				end
+				
+				SeparateSection:_update()
+				return SeparateSection
+			end
+			
+			function SubTab:Text(options)
+				options = EraLibrary:validate({
+					text = "No Text"
+				}, options or {})
+				
+				local TextFrame = {};
+				
+				--Render
+				do
+					-- StarterTextFrame.EraHubTextFrame.main.ContentContainer.HomeTab.SubTab1.Text
+					TextFrame["85"] = Instance.new("Frame", SubTab["25"]);
+					TextFrame["85"]["BorderSizePixel"] = 0;
+					TextFrame["85"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					TextFrame["85"]["Size"] = UDim2.new(1, 0, 0, 18);
+					TextFrame["85"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					TextFrame["85"]["Name"] = [[Text]];
+					TextFrame["85"]["BackgroundTransparency"] = 1;
+
+					-- StarterTextFrame.EraHubTextFrame.main.ContentContainer.HomeTab.SubTab1.Text.Text
+					TextFrame["86"] = Instance.new("TextLabel", TextFrame["85"]);
+					TextFrame["86"]["TextWrapped"] = true;
+					TextFrame["86"]["BorderSizePixel"] = 0;
+					TextFrame["86"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					TextFrame["86"]["TextYAlignment"] = Enum.TextYAlignment.Center;
+					TextFrame["86"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					TextFrame["86"]["TextSize"] = 14;
+					TextFrame["86"]["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+					TextFrame["86"]["TextColor3"] = Color3.fromRGB(239, 239, 239);
+					TextFrame["86"]["BackgroundTransparency"] = 1;
+					TextFrame["86"]["RichText"] = true;
+					TextFrame["86"]["Size"] = UDim2.new(1, 0, 1, 0);
+					TextFrame["86"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					TextFrame["86"]["Text"] = options.text;
+					TextFrame["86"]["Name"] = [[Text]];
+
+				end
+				
+				--Methods
+				do
+					
+				end
+				
+				return TextFrame;
+			end
+			
+			function SubTab:CreateLabel(options)
+				options = EraLibrary:validate({
+					text = "No Text"
+				}, options or {})
+				
+				local Label = {}
+				
+				--render 
+				do
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.Label
+					Label["27"] = Instance.new("Frame", SubTab["25"]);
+					Label["27"]["BorderSizePixel"] = 0;
+					Label["27"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					Label["27"]["ClipsDescendants"] = true;
+					Label["27"]["Size"] = UDim2.new(1, 0, 0, 23);
+					Label["27"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Label["27"]["Name"] = [[Label]];
+					Label["27"]["LayoutOrder"] = 1;
+					-- Attributes
+					Label["27"]:SetAttribute([[Label]], [[]]);
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.Label.UICorner
+					Label["28"] = Instance.new("UICorner", Label["277"]);
+					Label["28"]["CornerRadius"] = UDim.new(0, 4);
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.Label.UIStroke
+					Label["29"] = Instance.new("UIStroke", Label["27"]);
+					Label["29"]["Color"] = Color3.fromRGB(71, 71, 71);
+
+					-- StarterGui.EraHubGui.main.ContentContainer.HomeTab.SubTab1.Label.Title
+					Label["2a"] = Instance.new("TextLabel", Label["27"]);
+					Label["2a"]["TextWrapped"] = true;
+					Label["2a"]["BorderSizePixel"] = 0;
+					Label["2a"]["AutoLocalize"] = false;
+					Label["2a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					Label["2a"]["TextScaled"] = false;
+					Label["2a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Label["2a"]["TextSize"] = 14;
+					Label["2a"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Label["2a"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					Label["2a"]["BackgroundTransparency"] = 1;
+					Label["2a"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					Label["2a"]["Size"] = UDim2.new(0.95, 0, 0, 14);
+					Label["2a"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Label["2a"]["Name"] = [[Title]];
+					Label["2a"]["TextWrapped"] = true;
+					Label["2a"]["Position"] = UDim2.new(0.0251, 0, 0.478, 0);
+					Label["2a"]["Text"] = options.text;
+				end
+				
+				--Methods
+				
+				function Label:SetText(text)
+					options.text = text
+					Label:_update()
+				end
+
+				function Label:_update()
+					Label["2a"].Text = options.text
+
+					Label["2a"].Size = UDim2.new(Label["2a"].Size.X.Scale, Label["2a"].Size.X.Offset,0, math.huge)
+					Label["2a"].Size = UDim2.new(Label["2a"].Size.X.Scale, Label["2a"].Size.X.Offset,0, Label["2a"].TextBounds.Y)
+					EraLibrary:tween(Label["27"], {Size = UDim2.new(Label["27"].Size.X.Scale, Label["27"].Size.X.Offset,0, Label["2a"].TextBounds.Y + 12)})
+				end
+
+				Label:_update()
+				return Label
+			end
+			
+			function SubTab:CreateButton(options)
+				options = EraLibrary:validate({
+					name = "No Name",
+					callback = function() end
+				}, options or {})
+				
+				local Button = {
+					hover = false,
+					MouseDown = false
+				}
+				
+				--Render
+				do
+					-- StarterButton.EraHubButton.main.ContentContainer.HomeTab.SubTab1.Button
+					Button["2b"] = Instance.new("Frame", SubTab["25"]);
+					Button["2b"]["BorderSizePixel"] = 0;
+					Button["2b"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					Button["2b"]["ClipsDescendants"] = true;
+					Button["2b"]["Size"] = UDim2.new(0.82245, 0, 0, 23);
+					Button["2b"]["Position"] = UDim2.new(0, 0, 0, 30);
+					Button["2b"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Button["2b"]["Name"] = [[Button]];
+					-- Attributes
+					Button["2b"]:SetAttribute([[Label]], [[]]);
+
+					-- StarterButton.EraHubButton.main.ContentContainer.HomeTab.SubTab1.Button.UIStroke
+					Button["2c"] = Instance.new("UIStroke", Button["2b"]);
+					Button["2c"]["Color"] = Color3.fromRGB(71, 71, 71);
+
+					-- StarterButton.EraHubButton.main.ContentContainer.HomeTab.SubTab1.Button.Title
+					Button["2d"] = Instance.new("TextLabel", Button["2b"]);
+					Button["2d"]["TextWrapped"] = true;
+					Button["2d"]["BorderSizePixel"] = 0;
+					Button["2d"]["AutoLocalize"] = false;
+					Button["2d"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					Button["2d"]["TextScaled"] = true;
+					Button["2d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Button["2d"]["TextSize"] = 14;
+					Button["2d"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Button["2d"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					Button["2d"]["BackgroundTransparency"] = 1;
+					Button["2d"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					Button["2d"]["Size"] = UDim2.new(0.95, 0, 0, 14);
+					Button["2d"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Button["2d"]["Text"] = options.name;
+					Button["2d"]["Name"] = [[Title]];
+					Button["2d"]["Position"] = UDim2.new(0.5058, 0, 0.47826, 0);
+
+					-- StarterButton.EraHubButton.main.ContentContainer.HomeTab.SubTab1.Button.ElementIndicator
+					Button["2e"] = Instance.new("TextLabel", Button["2b"]);
+					Button["2e"]["TextWrapped"] = true;
+					Button["2e"]["BorderSizePixel"] = 0;
+					Button["2e"]["AutoLocalize"] = false;
+					Button["2e"]["TextXAlignment"] = Enum.TextXAlignment.Right;
+					Button["2e"]["TextTransparency"] = 0.9;
+					Button["2e"]["TextScaled"] = true;
+					Button["2e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Button["2e"]["TextSize"] = 14;
+					Button["2e"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Button["2e"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					Button["2e"]["BackgroundTransparency"] = 1;
+					Button["2e"]["AnchorPoint"] = Vector2.new(1, 0.5);
+					Button["2e"]["Size"] = UDim2.new(0, 108, 0, 13);
+					Button["2e"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Button["2e"]["Text"] = [[button]];
+					Button["2e"]["Name"] = [[ElementIndicator]];
+					Button["2e"]["Position"] = UDim2.new(0.99, 0, 0.5, 0);
+				end
+				
+				--Methods
+				
+				function Button:SetText(text)
+					options.name = text
+					Button["2d"].Text = text
+				end
+
+				function Button:SetCallback(fn)
+					options.callback = fn
+				end
+				
+				--Logic
+				do
+					Button["2b"].MouseEnter:Connect(function()
+						Button.Hover = true
+
+						EraLibrary:tween(Button["2c"], {Color = Color3.fromRGB(123,123,123)})
+
+					end)
+
+					Button["2b"].MouseLeave:Connect(function()
+						Button.Hover = false
+
+						if not Button.MouseDown then
+							EraLibrary:tween(Button["2c"], {Color = Color3.fromRGB(71, 71, 71)})
+						end
+					end)
+					
+					uis.InputBegan:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 and Button.Hover then
+							Button.MouseDown = true
+							EraLibrary:tween(Button["2b"], {BackgroundColor3 = Color3.fromRGB(81, 81, 81)})
+							EraLibrary:tween(Button["2c"], {Color = Color3.fromRGB(150, 150, 150)})
+							
+							local Success, Response = pcall(options.callback)
+							if not Success then
+								EraLibrary:NotifyErrors(tostring(Response))
+							end
+							
+						end
+					end)
+
+					uis.InputEnded:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 then
+							Button.MouseDown = false
+
+							if Button.Hover then 
+								EraLibrary:tween(Button["2b"], {BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+								EraLibrary:tween(Button["2c"], {Color = Color3.fromRGB(81,81,81)})
+							else
+								EraLibrary:tween(Button["2b"], {BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+								EraLibrary:tween(Button["2c"], {Color = Color3.fromRGB(81,81,81)})
+							end
+						end
+					end)
+				end
+				
+				return Button
+			end
+			
+			function SubTab:CreateToggle(options)
+				options = EraLibrary:validate({
+					name = "No Name",
+					callback = function(v) end
+				}, options or {})
+				
+				local Toggle = {
+					Hover = false,
+					MouseDown = false,
+					State = false
+				}
+				
+				--Render
+				do
+					-- StarterToggle.EraHubToggle.main.ContentContainer.HomeTab.SubTab1.InactiveToggle
+					Toggle["2f"] = Instance.new("Frame", SubTab["25"]);
+					Toggle["2f"]["BorderSizePixel"] = 0;
+					Toggle["2f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Toggle["2f"]["Size"] = UDim2.new(1, 0, 0, 16);
+					Toggle["2f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Toggle["2f"]["Name"] = [[InactiveToggle]];
+					Toggle["2f"]["BackgroundTransparency"] = 1;
+
+					-- StarterToggle.EraHubToggle.main.ContentContainer.HomeTab.SubTab1.InactiveToggle.FrameToggle
+					Toggle["30"] = Instance.new("Frame", Toggle["2f"]);
+					Toggle["30"]["BorderSizePixel"] = 0;
+					Toggle["30"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					Toggle["30"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					Toggle["30"]["Size"] = UDim2.new(0, 16, 0, 16);
+					Toggle["30"]["Position"] = UDim2.new(0, 0, 0.5, 0);
+					Toggle["30"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Toggle["30"]["Name"] = [[FrameToggle]];
+
+					-- StarterToggle.EraHubToggle.main.ContentContainer.HomeTab.SubTab1.InactiveToggle.FrameToggle.UIStroke
+					Toggle["31"] = Instance.new("UIStroke", Toggle["30"]);
+					Toggle["31"]["Color"] = Color3.fromRGB(71, 71, 71);
+
+					-- StarterToggle.EraHubToggle.main.ContentContainer.HomeTab.SubTab1.InactiveToggle.FrameToggle.Mark
+					Toggle["32"] = Instance.new("ImageLabel", Toggle["30"]);
+					Toggle["32"]["BorderSizePixel"] = 0;
+					Toggle["32"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Toggle["32"]["ImageTransparency"] = 1;
+					Toggle["32"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					Toggle["32"]["Image"] = [[rbxassetid://17737364778]];
+					Toggle["32"]["Size"] = UDim2.new(1, 0, 1, 0);
+					Toggle["32"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Toggle["32"]["BackgroundTransparency"] = 1;
+					Toggle["32"]["Name"] = [[Mark]];
+					Toggle["32"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+					-- StarterToggle.EraHubToggle.main.ContentContainer.HomeTab.SubTab1.InactiveToggle.Title
+					Toggle["33"] = Instance.new("TextLabel", Toggle["2f"]);
+					Toggle["33"]["TextWrapped"] = true;
+					Toggle["33"]["BorderSizePixel"] = 0;
+					Toggle["33"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					Toggle["33"]["TextScaled"] = true;
+					Toggle["33"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Toggle["33"]["TextSize"] = 14;
+					Toggle["33"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Toggle["33"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					Toggle["33"]["BackgroundTransparency"] = 1;
+					Toggle["33"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					Toggle["33"]["Size"] = UDim2.new(0, 181, 0, 15);
+					Toggle["33"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Toggle["33"]["Text"] = options.name;
+					Toggle["33"]["Name"] = [[Title]];
+					Toggle["33"]["Position"] = UDim2.new(0, 110, 0, 8);
+					
+				end
+				
+				--Methods
+				do
+					function Toggle:Toggle(b)
+						if b == nil then
+							Toggle.State = not Toggle.State
+						else
+							Toggle.State = b
+						end
+
+						if Toggle.State  then
+							EraLibrary:tween(Toggle["30"], {BackgroundColor3 = Color3.fromRGB(46, 46, 46)})
+							EraLibrary:tween(Toggle["32"], {ImageTransparency = 0})
+						else
+							EraLibrary:tween(Toggle["30"], {BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+							EraLibrary:tween(Toggle["32"], {ImageTransparency = 1})
+						end				
+
+						
+						local Success, Response = pcall(function()
+							options.callback(Toggle.State)
+						end)
+						if not Success then
+							EraLibrary:NotifyErrors(tostring(Response))
+						end
+						
+					end
+				end
+				
+				--Logic
+				do
+					Toggle["2f"].MouseEnter:Connect(function()
+						Toggle.Hover = true
+						
+						EraLibrary:tween(Toggle["31"], {Color = Color3.fromRGB(123,123,123)})
+						
+						
+
+					end)
+
+					Toggle["2f"].MouseLeave:Connect(function()
+						Toggle.Hover = false
+
+						if not Toggle.MouseDown  then
+							EraLibrary:tween(Toggle["31"], {Color = Color3.fromRGB(81, 81, 81)})
+						end
+					end)
+
+					uis.InputBegan:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 and Toggle.Hover then
+							Toggle.MouseDown = true
+							EraLibrary:tween(Toggle["31"], {Color = Color3.fromRGB(102, 102, 102)})
+							Toggle:Toggle()
+
+						end
+					end)
+
+					uis.InputEnded:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 then
+							Toggle.MouseDown = false
+
+							if Toggle.Hover then 
+								EraLibrary:tween(Toggle["31"], {Color = Color3.fromRGB(81, 81, 81)})
+							else
+								EraLibrary:tween(Toggle["31"], {Color = Color3.fromRGB(81, 81, 81)})
+							end
+						end
+					end)
+				end
+				
+				return Toggle
+			end
+			
+			function SubTab:CreateBindToggle(options)
+				options = EraLibrary:validate({
+					name = "No name",
+					callback = function(v) end
+				}, options or {})
+				
+				local BindToggle = {
+					Hover = false,
+					BindHover = false,
+					MouseDown = false,
+					State = false,
+					BindAble = false,
+					ReadyToBind = false,
+				}
+				
+				--Render
+				do
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle
+					BindToggle["7d"] = Instance.new("Frame", SubTab["25"]);
+					BindToggle["7d"]["BorderSizePixel"] = 0;
+					BindToggle["7d"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					BindToggle["7d"]["Size"] = UDim2.new(1, 0, 0, 16);
+					BindToggle["7d"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					BindToggle["7d"]["Name"] = [[BindableInactiveToggle]];
+					BindToggle["7d"]["BackgroundTransparency"] = 1;
+					
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.FrameToggle
+					BindToggle["7e"] = Instance.new("Frame", BindToggle["7d"]);
+					BindToggle["7e"]["BorderSizePixel"] = 0;
+					BindToggle["7e"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					BindToggle["7e"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					BindToggle["7e"]["Size"] = UDim2.new(0, 16, 0, 16);
+					BindToggle["7e"]["Position"] = UDim2.new(0, 0, 0.5, 0);
+					BindToggle["7e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					BindToggle["7e"]["Name"] = [[FrameToggle]];
+
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.FrameToggle.UIStroke
+					BindToggle["7f"] = Instance.new("UIStroke", BindToggle["7e"]);
+					BindToggle["7f"]["Color"] = Color3.fromRGB(71, 71, 71);
+
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.FrameToggle.Mark
+					BindToggle["80"] = Instance.new("ImageLabel", BindToggle["7e"]);
+					BindToggle["80"]["BorderSizePixel"] = 0;
+					BindToggle["80"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					BindToggle["80"]["ImageTransparency"] = 1;
+					BindToggle["80"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					BindToggle["80"]["Image"] = [[rbxassetid://17737364778]];
+					BindToggle["80"]["Size"] = UDim2.new(1, 0, 1, 0);
+					BindToggle["80"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					BindToggle["80"]["BackgroundTransparency"] = 1;
+					BindToggle["80"]["Name"] = [[Mark]];
+					BindToggle["80"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.Title
+					BindToggle["81"] = Instance.new("TextLabel", BindToggle["7d"]);
+					BindToggle["81"]["TextWrapped"] = true;
+					BindToggle["81"]["BorderSizePixel"] = 0;
+					BindToggle["81"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					BindToggle["81"]["TextScaled"] = true;
+					BindToggle["81"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					BindToggle["81"]["TextSize"] = 14;
+					BindToggle["81"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					BindToggle["81"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					BindToggle["81"]["BackgroundTransparency"] = 1;
+					BindToggle["81"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					BindToggle["81"]["Size"] = UDim2.new(0, 181, 0, 15);
+					BindToggle["81"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					BindToggle["81"]["Text"] = options.name;
+					BindToggle["81"]["Name"] = [[Title]];
+					BindToggle["81"]["Position"] = UDim2.new(0, 110, 0, 8);
+
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.BindFrame
+					BindToggle["82"] = Instance.new("Frame", BindToggle["7d"]);
+					BindToggle["82"]["BorderSizePixel"] = 0;
+					BindToggle["82"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					BindToggle["82"]["AnchorPoint"] = Vector2.new(1, 0.5);
+					BindToggle["82"]["Size"] = UDim2.new(0, 38, 1, 0);
+					BindToggle["82"]["Position"] = UDim2.new(1, 0, 0.5, 0);
+					BindToggle["82"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					BindToggle["82"]["Name"] = [[BindFrame]];
+
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.BindFrame.BindText
+					BindToggle["83"] = Instance.new("TextButton", BindToggle["82"]);
+					BindToggle["83"]["TextWrapped"] = false;
+					BindToggle["83"]["BorderSizePixel"] = 0;
+					BindToggle["83"]["TextYAlignment"] = Enum.TextYAlignment.Top;
+					BindToggle["83"]["TextXAlignment"] = Enum.TextXAlignment.Center;
+					BindToggle["83"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					BindToggle["83"]["TextSize"] = 14;
+					BindToggle["83"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+					BindToggle["83"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
+					BindToggle["83"]["BackgroundTransparency"] = 1;
+					BindToggle["83"]["RichText"] = true;
+					BindToggle["83"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					BindToggle["83"]["Size"] = UDim2.new(1, 0, 1, 0);
+					BindToggle["83"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					BindToggle["83"]["Text"] = [[None]];
+					BindToggle["83"]["Name"] = [[BindText]];
+					BindToggle["83"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+					-- StarterBindToggle.EraHubBindToggle.main.ContentContainer.HomeTab.SubTab1.BindableInactiveToggle.BindFrame.UIStroke
+					BindToggle["84"] = Instance.new("UIStroke", BindToggle["82"]);
+					BindToggle["84"]["Color"] = Color3.fromRGB(81, 81, 81);
+				end
+				
+				--Methods
+				function BindToggle:Toggle(b)
+					if b == nil then
+						BindToggle.State = not BindToggle.State
+					else
+						BindToggle.State = b
+					end
+
+					if BindToggle.State  then
+						EraLibrary:tween(BindToggle["7e"], {BackgroundColor3 = Color3.fromRGB(46, 46, 46)})
+						EraLibrary:tween(BindToggle["80"], {ImageTransparency = 0})
+					else
+						EraLibrary:tween(BindToggle["7e"], {BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+						EraLibrary:tween(BindToggle["80"], {ImageTransparency = 1})
+					end				
+
+
+					local Success, Response = pcall(function()
+						options.callback(BindToggle.State)
+					end)
+					if not Success then
+						EraLibrary:NotifyErrors(tostring(Response))
+					end
+
+				end
+				
+				function BindToggle:SetBindText(text)
+					BindToggle["83"]["Text"] = text
+					
+					EraLibrary:tween(BindToggle["82"], {Size = UDim2.new(0, BindToggle["83"].TextBounds.X + 10, 1, 0)})
+				end
+				
+				--Logic
+				do
+					BindToggle["7d"].MouseEnter:Connect(function()
+						BindToggle.Hover = true
+						
+						
+						EraLibrary:tween(BindToggle["7f"], {Color = Color3.fromRGB(123,123,123)})
+						
+
+					end)
+
+					BindToggle["7d"].MouseLeave:Connect(function()
+						BindToggle.Hover = false
+
+						if not BindToggle.MouseDown then
+							EraLibrary:tween(BindToggle["7f"], {Color = Color3.fromRGB(81, 81, 81)})
+						end
+					end)
+ 
+					BindToggle["82"].MouseEnter:Connect(function()
+						BindToggle.BindHover = true
+						EraLibrary:tween(BindToggle["84"], {Color = Color3.fromRGB(123,123,123)})
+
+					end)
+
+					BindToggle["82"].MouseLeave:Connect(function()
+						BindToggle.BindHover = false
+						EraLibrary:tween(BindToggle["84"], {Color = Color3.fromRGB(81, 81, 81)})
+						
+					end)
+
+					BindToggle["83"].MouseButton1Down:Connect(function()
+						BindToggle:SetBindText("...")
+						if BindToggle.BindAble then
+							BindToggle.BindAble = false
+							BindToggle.ReadyToBind = false
+							BindToggle.BindKey = nil
+							BindToggle:SetBindText("None")
+							return
+						end
+						
+						BindToggle.BindAble = true
+						BindToggle.ReadyToBind = true
+					end)
+
+					uis.InputBegan:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 and BindToggle.Hover then
+							BindToggle.MouseDown = true
+							EraLibrary:tween(BindToggle["7f"], {Color = Color3.fromRGB(102, 102, 102)})
+							BindToggle:Toggle()
+						end
+
+						if BindToggle.ReadyToBind and BindToggle.BindAble then
+							if input.KeyCode == Enum.KeyCode.Delete then
+								BindToggle:SetBindText("None")
+								BindToggle.ReadyToBind = false
+								BindToggle.BindAble = false
+								return
+							end
+							
+							if input.UserInputType == Enum.UserInputType.Keyboard then
+								
+								if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.S or input.KeyCode == Enum.KeyCode.D  then
+									return
+								end
+								
+								BindToggle.BindKey = input.KeyCode
+								BindToggle:SetBindText(tostring(BindToggle.BindKey.Name))
+								BindToggle.ReadyToBind = false
+								BindToggle.BindAble = false
+								return
+							end
+						end
+
+						if input.UserInputType == Enum.UserInputType.Keyboard then
+							if input.KeyCode == BindToggle.BindKey then
+								BindToggle:Toggle()
+							end
+						end
+					end)
+					
+					uis.InputEnded:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 then
+							BindToggle.MouseDown = false
+
+							if BindToggle.Hover then 
+								EraLibrary:tween(BindToggle["7f"], {Color = Color3.fromRGB(81, 81, 81)})
+							else
+								EraLibrary:tween(BindToggle["7f"], {Color = Color3.fromRGB(81, 81, 81)})
+							end
+						end
+					end)
+					
+				end
+				
+				
+				return BindToggle
+			end
+			
+			function SubTab:CreateColorPickerToggle(options)
+				options = EraLibrary:validate({
+					name = "No Name",
+					color = Color3.fromRGB(255,255,255),
+					callback = function(v) end
+				}, options or {})
+				
+				local ColorPickerToggle = {
+					Hover = false,
+					MouseDown = false,
+					opened = false,
+					State = false,	
+					mainDragging = false,
+					sliderDragging = false,
+					Color = options.color
+				};
+				
+				--Render
+				do
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ContentContainer.HomeTab.SubTab1.InactiveColorPickerToggle
+					ColorPickerToggle["6e"] = Instance.new("Frame", SubTab["25"]);
+					ColorPickerToggle["6e"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["6e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["6e"]["Size"] = UDim2.new(1, 0, 0, 16);
+					ColorPickerToggle["6e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["6e"]["Name"] = [[InactiveColorPickerToggle]];
+					ColorPickerToggle["6e"]["BackgroundTransparency"] = 1;
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ContentContainer.HomeTab.SubTab1.InactiveColorPickerToggle.FrameToggle
+					ColorPickerToggle["6f"] = Instance.new("Frame", ColorPickerToggle["6e"]);
+					ColorPickerToggle["6f"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["6f"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					ColorPickerToggle["6f"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					ColorPickerToggle["6f"]["Size"] = UDim2.new(0, 16, 0, 16);
+					ColorPickerToggle["6f"]["Position"] = UDim2.new(0, 0, 0.5, 0);
+					ColorPickerToggle["6f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["6f"]["Name"] = [[FrameToggle]];
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ContentContainer.HomeTab.SubTab1.InactiveColorPickerToggle.FrameToggle.Mark
+					ColorPickerToggle["70"] = Instance.new("ImageLabel", ColorPickerToggle["6f"]);
+					ColorPickerToggle["70"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["70"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["70"]["ImageTransparency"] = 1;
+					ColorPickerToggle["70"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					ColorPickerToggle["70"]["Image"] = [[rbxassetid://17737364778]];
+					ColorPickerToggle["70"]["Size"] = UDim2.new(1, 0, 1, 0);
+					ColorPickerToggle["70"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["70"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["70"]["Name"] = [[Mark]];
+					ColorPickerToggle["70"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ContentContainer.HomeTab.SubTab1.InactiveColorPickerToggle.FrameToggle.UIStroke
+					ColorPickerToggle["71"] = Instance.new("UIStroke", ColorPickerToggle["6f"]);
+					ColorPickerToggle["71"]["Color"] = Color3.fromRGB(81, 81, 81);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ContentContainer.HomeTab.SubTab1.InactiveColorPickerToggle.Title
+					ColorPickerToggle["72"] = Instance.new("TextLabel", ColorPickerToggle["6e"]);
+					ColorPickerToggle["72"]["TextWrapped"] = true;
+					ColorPickerToggle["72"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["72"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					ColorPickerToggle["72"]["TextScaled"] = true;
+					ColorPickerToggle["72"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["72"]["TextSize"] = 14;
+					ColorPickerToggle["72"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					ColorPickerToggle["72"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					ColorPickerToggle["72"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["72"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					ColorPickerToggle["72"]["Size"] = UDim2.new(0, 181, 0, 15);
+					ColorPickerToggle["72"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["72"]["Text"] = options.name;
+					ColorPickerToggle["72"]["Name"] = [[Title]];
+					ColorPickerToggle["72"]["Position"] = UDim2.new(0, 110, 0, 8);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ContentContainer.HomeTab.SubTab1.InactiveColorPickerToggle.TotalColor
+					ColorPickerToggle["73"] = Instance.new("ImageButton", ColorPickerToggle["6e"]);
+					ColorPickerToggle["73"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["73"]["BackgroundColor3"] = options.color;
+					ColorPickerToggle["73"]["AnchorPoint"] = Vector2.new(1, 0.5);
+					ColorPickerToggle["73"]["Size"] = UDim2.new(0, 30, 0, 16);
+					ColorPickerToggle["73"]["Position"] = UDim2.new(1, 0, 0.5, 0);
+					ColorPickerToggle["73"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["73"]["Name"] = [[TotalColor]];
+					ColorPickerToggle["73"]["AutoButtonColor"] = false
+					ColorPickerToggle["73"]["Interactable"] = true
+					
+					
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker
+					ColorPickerToggle["c1"] = Instance.new("Frame", EraGui["c0"]);
+					ColorPickerToggle["c1"]["ZIndex"] = 1;
+					ColorPickerToggle["c1"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["c1"]["BackgroundColor3"] = Color3.fromRGB(36, 36, 36);
+					ColorPickerToggle["c1"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					ColorPickerToggle["c1"]["Size"] = UDim2.new(0, 160, 0, 150);
+					ColorPickerToggle["c1"]["Position"] = UDim2.new(1.05299, 0, 0.50489, 0);
+					ColorPickerToggle["c1"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["c1"]["Name"] = [[ColorPicker]];
+					ColorPickerToggle["c1"]["LayoutOrder"] = 1;
+					ColorPickerToggle["c1"]["Visible"] = false
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground
+					ColorPickerToggle["c2"] = Instance.new("Frame", ColorPickerToggle["c1"]);
+					ColorPickerToggle["c2"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["c2"]["BackgroundColor3"] = Color3.fromRGB(99, 255, 0);
+					ColorPickerToggle["c2"]["AnchorPoint"] = Vector2.new(0.5, 0);
+					ColorPickerToggle["c2"]["Size"] = UDim2.new(0, 150, 0, 74);
+					ColorPickerToggle["c2"]["Position"] = UDim2.new(0, 80, 0, 25);
+					ColorPickerToggle["c2"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["c2"]["BackgroundTransparency"] = 0
+					ColorPickerToggle["c2"]["Name"] = [[CPBackground]];
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.MainCP
+					ColorPickerToggle["c3"] = Instance.new("ImageButton", ColorPickerToggle["c2"]);
+					ColorPickerToggle["c3"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["c3"]["ImageTransparency"] = 0;
+					ColorPickerToggle["c3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["c3"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					ColorPickerToggle["c3"]["Image"] = [[http://www.roblox.com/asset/?id=11415645739]];
+					ColorPickerToggle["c3"]["Size"] = UDim2.new(1, 0, 1, 0);
+					ColorPickerToggle["c3"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["c3"]["Name"] = [[MainCP]];
+					ColorPickerToggle["c3"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["c3"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.MainCP.UICorner
+					ColorPickerToggle["c4"] = Instance.new("UICorner", ColorPickerToggle["c3"]);
+					ColorPickerToggle["c4"]["CornerRadius"] = UDim.new(0, 5);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.MainCP.MainPoint
+					ColorPickerToggle["c5"] = Instance.new("ImageButton", ColorPickerToggle["c3"]);
+					ColorPickerToggle["c5"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["c5"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["c5"]["ImageColor3"] = Color3.fromRGB(29, 73, 0);
+					ColorPickerToggle["c5"]["Image"] = [[http://www.roblox.com/asset/?id=3259050989]];
+					ColorPickerToggle["c5"]["Size"] = UDim2.new(0, 59, 0, 59);
+					ColorPickerToggle["c5"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["c5"]["Name"] = [[MainPoint]];
+					ColorPickerToggle["c5"]["ImageTransparency"] = 0;
+					ColorPickerToggle["c5"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["c5"]["Position"] = UDim2.new(0.18282, 0, 0.24896, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.UICorner
+					ColorPickerToggle["c6"] = Instance.new("UICorner", ColorPickerToggle["c2"]);
+					ColorPickerToggle["c6"]["CornerRadius"] = UDim.new(0, 6);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.Display
+					ColorPickerToggle["c7"] = Instance.new("Frame", ColorPickerToggle["c2"]);
+					ColorPickerToggle["c7"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["c7"]["BackgroundColor3"] = Color3.fromRGB(99, 255, 0);
+					ColorPickerToggle["c7"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					ColorPickerToggle["c7"]["Size"] = UDim2.new(1, 0, 1, 0);
+					ColorPickerToggle["c7"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+					ColorPickerToggle["c7"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["c7"]["BackgroundTransparency"] = 1
+					ColorPickerToggle["c7"]["Name"] = [[Display]];
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.Display.UICorner
+					ColorPickerToggle["c8"] = Instance.new("UICorner", ColorPickerToggle["c7"]);
+					ColorPickerToggle["c8"]["CornerRadius"] = UDim.new(0, 6);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.Display.Frame
+					ColorPickerToggle["c9"] = Instance.new("Frame", ColorPickerToggle["c7"]);
+					ColorPickerToggle["c9"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["c9"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["c9"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					ColorPickerToggle["c9"]["Size"] = UDim2.new(1, 0, 1, 0);
+					ColorPickerToggle["c9"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+					ColorPickerToggle["c9"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["c9"]["BackgroundTransparency"] = 0.75;
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.CPBackground.Display.Frame.UICorner
+					ColorPickerToggle["ca"] = Instance.new("UICorner", ColorPickerToggle["c9"]);
+					ColorPickerToggle["ca"]["CornerRadius"] = UDim.new(0, 6);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorSlider
+					ColorPickerToggle["cb"] = Instance.new("ImageButton", ColorPickerToggle["c1"]);
+					ColorPickerToggle["cb"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["cb"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["cb"]["AnchorPoint"] = Vector2.new(0.5, 0);
+					ColorPickerToggle["cb"]["Image"] = [[rbxasset://textures/ui/ColorPickerToggleImagePlaceholder.png]];
+					ColorPickerToggle["cb"]["Size"] = UDim2.new(0, 150, 0, 14);
+					ColorPickerToggle["cb"]["Name"] = [[ColorSlider]];
+					ColorPickerToggle["cb"]["ClipsDescendants"] = true;
+					ColorPickerToggle["cb"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["cb"]["Position"] = UDim2.new(0.5, 0, 0.69, 0);
+					ColorPickerToggle["cb"]["AutoButtonColor"] = false;
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorSlider.UIGradient
+					ColorPickerToggle["cc"] = Instance.new("UIGradient", ColorPickerToggle["cb"]);
+					ColorPickerToggle["cc"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(255, 0, 0)),ColorSequenceKeypoint.new(0.056, Color3.fromRGB(255, 86, 0)),ColorSequenceKeypoint.new(0.111, Color3.fromRGB(255, 171, 0)),ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),ColorSequenceKeypoint.new(0.223, Color3.fromRGB(170, 255, 0)),ColorSequenceKeypoint.new(0.279, Color3.fromRGB(84, 255, 0)),ColorSequenceKeypoint.new(0.334, Color3.fromRGB(0, 255, 2)),ColorSequenceKeypoint.new(0.390, Color3.fromRGB(0, 255, 87)),ColorSequenceKeypoint.new(0.446, Color3.fromRGB(0, 255, 172)),ColorSequenceKeypoint.new(0.501, Color3.fromRGB(0, 253, 255)),ColorSequenceKeypoint.new(0.557, Color3.fromRGB(0, 168, 255)),ColorSequenceKeypoint.new(0.613, Color3.fromRGB(0, 83, 255)),ColorSequenceKeypoint.new(0.669, Color3.fromRGB(3, 0, 255)),ColorSequenceKeypoint.new(0.724, Color3.fromRGB(89, 0, 255)),ColorSequenceKeypoint.new(0.780, Color3.fromRGB(174, 0, 255)),ColorSequenceKeypoint.new(0.836, Color3.fromRGB(255, 0, 252)),ColorSequenceKeypoint.new(0.891, Color3.fromRGB(255, 0, 167)),ColorSequenceKeypoint.new(0.947, Color3.fromRGB(255, 0, 81)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(255, 0, 0))};
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorSlider.SliderPoint
+					ColorPickerToggle["cd"] = Instance.new("ImageButton", ColorPickerToggle["cb"]);
+					ColorPickerToggle["cd"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["cd"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["cd"]["ImageColor3"] = Color3.fromRGB(0, 255, 0);
+					ColorPickerToggle["cd"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					ColorPickerToggle["cd"]["Image"] = [[rbxassetid://12645990674]];
+					ColorPickerToggle["cd"]["Size"] = UDim2.new(0, 8, 0, 8);
+					ColorPickerToggle["cd"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["cd"]["Name"] = [[SliderPoint]];
+					ColorPickerToggle["cd"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["cd"]["Position"] = UDim2.new(0.182, 0, 0.5, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorSlider.TintAdder
+					ColorPickerToggle["ce"] = Instance.new("TextLabel", ColorPickerToggle["cb"]);
+					ColorPickerToggle["ce"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["ce"]["AutoLocalize"] = false;
+					ColorPickerToggle["ce"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["ce"]["TextSize"] = 14;
+					ColorPickerToggle["ce"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+					ColorPickerToggle["ce"]["TextColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["ce"]["BackgroundTransparency"] = 0.8;
+					ColorPickerToggle["ce"]["Size"] = UDim2.new(1, 0, 1, 0);
+					ColorPickerToggle["ce"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["ce"]["Text"] = [[]];
+					ColorPickerToggle["ce"]["Name"] = [[TintAdder]];
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorSlider.TintAdder.UICorner
+					ColorPickerToggle["cf"] = Instance.new("UICorner", ColorPickerToggle["ce"]);
+					ColorPickerToggle["cf"]["CornerRadius"] = UDim.new(0, 4);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorSlider.UICorner
+					ColorPickerToggle["d0"] = Instance.new("UICorner", ColorPickerToggle["cb"]);
+					ColorPickerToggle["d0"]["CornerRadius"] = UDim.new(0, 4);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.Lock
+					ColorPickerToggle["d1"] = Instance.new("Frame", ColorPickerToggle["c1"]);
+					ColorPickerToggle["d1"]["ZIndex"] = 5;
+					ColorPickerToggle["d1"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["d1"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["d1"]["AnchorPoint"] = Vector2.new(1, 0);
+					ColorPickerToggle["d1"]["Size"] = UDim2.new(1, 0, 1, 0);
+					ColorPickerToggle["d1"]["Position"] = UDim2.new(1, 0, 0, 0);
+					ColorPickerToggle["d1"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["d1"]["Name"] = [[Lock]];
+					ColorPickerToggle["d1"]["BackgroundTransparency"] = 1;
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.Lock.UICorner
+					ColorPickerToggle["d2"] = Instance.new("UICorner", ColorPickerToggle["d1"]);
+					ColorPickerToggle["d2"]["CornerRadius"] = UDim.new(0, 4);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.Lock.Reason
+					ColorPickerToggle["d3"] = Instance.new("TextLabel", ColorPickerToggle["d1"]);
+					ColorPickerToggle["d3"]["ZIndex"] = 5;
+					ColorPickerToggle["d3"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["d3"]["AutoLocalize"] = false;
+					ColorPickerToggle["d3"]["TextTransparency"] = 1;
+					ColorPickerToggle["d3"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["d3"]["TextSize"] = 13;
+					ColorPickerToggle["d3"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					ColorPickerToggle["d3"]["TextColor3"] = Color3.fromRGB(176, 176, 176);
+					ColorPickerToggle["d3"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["d3"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					ColorPickerToggle["d3"]["Size"] = UDim2.new(0, 0, 1, 0);
+					ColorPickerToggle["d3"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["d3"]["Text"] = [[Locked Reason]];
+					ColorPickerToggle["d3"]["AutomaticSize"] = Enum.AutomaticSize.X;
+					ColorPickerToggle["d3"]["Name"] = [[Reason]];
+					ColorPickerToggle["d3"]["Position"] = UDim2.new(0.5, 0, 0.5, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.Lock.Reason.Icon
+					ColorPickerToggle["d4"] = Instance.new("ImageLabel", ColorPickerToggle["d3"]);
+					ColorPickerToggle["d4"]["ZIndex"] = 5;
+					ColorPickerToggle["d4"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["d4"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["d4"]["ImageTransparency"] = 1;
+					ColorPickerToggle["d4"]["ImageColor3"] = Color3.fromRGB(176, 176, 176);
+					ColorPickerToggle["d4"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					ColorPickerToggle["d4"]["Image"] = [[rbxassetid://5743022869]];
+					ColorPickerToggle["d4"]["Size"] = UDim2.new(0, 16, 0, 16);
+					ColorPickerToggle["d4"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					ColorPickerToggle["d4"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["d4"]["Name"] = [[Icon]];
+					ColorPickerToggle["d4"]["Position"] = UDim2.new(1, 20, 0.5, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.Lock.UIGradient
+					ColorPickerToggle["d5"] = Instance.new("UIGradient", ColorPickerToggle["d1"]);
+					ColorPickerToggle["d5"]["Transparency"] = NumberSequence.new{NumberSequenceKeypoint.new(0.000, 0.325),NumberSequenceKeypoint.new(0.500, 0.1),NumberSequenceKeypoint.new(1.000, 0.325)};
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ColorPickerIs
+					ColorPickerToggle["d6"] = Instance.new("BoolValue", ColorPickerToggle["c1"]);
+					ColorPickerToggle["d6"]["Name"] = [[ColorPickerIs]];
+					ColorPickerToggle["d6"]["Value"] = true;
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.UIStroke
+					ColorPickerToggle["d7"] = Instance.new("UIStroke", ColorPickerToggle["c1"]);
+					ColorPickerToggle["d7"]["Color"] = Color3.fromRGB(71, 71, 71);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.Submit
+					ColorPickerToggle["d8"] = Instance.new("TextButton", ColorPickerToggle["c1"]);
+					ColorPickerToggle["d8"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["d8"]["AutoButtonColor"] = false;
+					ColorPickerToggle["d8"]["Active"] = false;
+					ColorPickerToggle["d8"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["d8"]["TextSize"] = 14;
+					ColorPickerToggle["d8"]["FontFace"] = Font.new([[rbxasset://fonts/families/Roboto.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+					ColorPickerToggle["d8"]["TextColor3"] = Color3.fromRGB(239, 239, 239);
+					ColorPickerToggle["d8"]["AnchorPoint"] = Vector2.new(0.5, 1);
+					ColorPickerToggle["d8"]["Size"] = UDim2.new(0.95, 0, 0, 20);
+					ColorPickerToggle["d8"]["BorderColor3"] = Color3.fromRGB(31, 31, 31);
+					ColorPickerToggle["d8"]["Text"] = [[Submit]];
+					ColorPickerToggle["d8"]["Name"] = [[Submit]];
+					ColorPickerToggle["d8"]["Position"] = UDim2.new(0.5, 0, 0.97, 0);
+					
+					ColorPickerToggle["d10"] = Instance.new("UIStroke", ColorPickerToggle["d8"])
+					ColorPickerToggle["d10"]["Color"] = Color3.fromRGB(61,61,61)
+					ColorPickerToggle["d10"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.NameText
+					ColorPickerToggle["d9"] = Instance.new("TextLabel", ColorPickerToggle["c1"]);
+					ColorPickerToggle["d9"]["TextWrapped"] = true;
+					ColorPickerToggle["d9"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["d9"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					ColorPickerToggle["d9"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					ColorPickerToggle["d9"]["TextSize"] = 14;
+					ColorPickerToggle["d9"]["FontFace"] = Font.new([[rbxasset://fonts/families/Ubuntu.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+					ColorPickerToggle["d9"]["TextColor3"] = Color3.fromRGB(239, 239, 239);
+					ColorPickerToggle["d9"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["d9"]["RichText"] = true;
+					ColorPickerToggle["d9"]["Size"] = UDim2.new(0, 121, 0, 25);
+					ColorPickerToggle["d9"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["d9"]["Text"] = options.name;
+					ColorPickerToggle["d9"]["Name"] = [[NameText]];
+					ColorPickerToggle["d9"]["Position"] = UDim2.new(0.03125, 0, 0, 0);
+
+					-- StarterColorPickerToggle.EraHubColorPickerToggle.main.ColorPickers.ColorPicker.ClossBut
+					ColorPickerToggle["da"] = Instance.new("ImageButton", ColorPickerToggle["c1"]);
+					ColorPickerToggle["da"]["BorderSizePixel"] = 0;
+					ColorPickerToggle["da"]["Active"] = false;
+					ColorPickerToggle["da"]["BackgroundColor3"] = Color3.fromRGB(200, 200, 200);
+					ColorPickerToggle["da"]["ImageColor3"] = Color3.fromRGB(200, 200, 200);
+					ColorPickerToggle["da"]["AnchorPoint"] = Vector2.new(1, 0);
+					ColorPickerToggle["da"]["Image"] = [[http://www.roblox.com/asset/?id=18267338951]];
+					ColorPickerToggle["da"]["Size"] = UDim2.new(0, 15, 0, 15);
+					ColorPickerToggle["da"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					ColorPickerToggle["da"]["BackgroundTransparency"] = 1;
+					ColorPickerToggle["da"]["Name"] = [[ClossBut]];
+					ColorPickerToggle["da"]["Position"] = UDim2.new(0.97, 0, 0.03, 0);
+					ColorPickerToggle["da"]["AutoButtonColor"] = false;
+				end
+				
+				--Methods
+				do
+					function ColorPickerToggle:Toggle(b)
+						if b == nil then
+							ColorPickerToggle.State = not ColorPickerToggle.State
+						else
+							ColorPickerToggle.State = b
+						end
+
+						if ColorPickerToggle.State  then
+							EraLibrary:tween(ColorPickerToggle["6f"], {BackgroundColor3 = Color3.fromRGB(46, 46, 46)})
+							EraLibrary:tween(ColorPickerToggle["70"], {ImageTransparency = 0})
+						else
+							EraLibrary:tween(ColorPickerToggle["6f"], {BackgroundColor3 = Color3.fromRGB(35, 35, 35)})
+							EraLibrary:tween(ColorPickerToggle["70"], {ImageTransparency = 1})
+						end				
+
+
+						local Success, Response = pcall(function()
+							options.callback({ColorPickerToggle.State, ColorPickerToggle.Color})
+						end)
+						if not Success then
+							EraLibrary:NotifyErrors(tostring(Response))
+						end
+
+					end
+				end
+				
+				--Logic
+				do
+					
+					--Box 
+					ColorPickerToggle["6e"].MouseEnter:Connect(function()
+						ColorPickerToggle.Hover = true
+
+						EraLibrary:tween(ColorPickerToggle["71"], {Color = Color3.fromRGB(123,123,123)})
+
+					end)
+
+					
+					ColorPickerToggle["6e"].MouseLeave:Connect(function()
+						ColorPickerToggle.Hover = false
+
+						if not ColorPickerToggle.MouseDown  then
+							EraLibrary:tween(ColorPickerToggle["71"], {Color = Color3.fromRGB(81, 81, 81)})
+						end
+					end)
+					
+					--Cross Button
+					ColorPickerToggle["da"].MouseEnter:Connect(function()
+						EraLibrary:tween(ColorPickerToggle["da"], {ImageColor3 = Color3.fromRGB(255, 255, 255)})
+					end)
+					ColorPickerToggle["da"].MouseLeave:Connect(function()
+						EraLibrary:tween(ColorPickerToggle["da"], {ImageColor3 = Color3.fromRGB(215, 215, 215)})
+					end)
+					ColorPickerToggle["da"].MouseButton1Down:Connect(function()
+						ColorPickerToggle["c1"]["Visible"] = false;
+						ColorPickerToggle.opened = ColorPickerToggle["c1"]["Visible"]
+					end)
+					
+					--Submit Button
+					ColorPickerToggle["d8"].MouseEnter:Connect(function()
+						EraLibrary:tween(ColorPickerToggle["d10"], {Color = Color3.fromRGB(91,91,91)})
+					end)
+					
+					ColorPickerToggle["d8"].MouseLeave:Connect(function()
+						EraLibrary:tween(ColorPickerToggle["d10"], {Color = Color3.fromRGB(61,61,61)})
+					end)
+					
+					ColorPickerToggle["73"].MouseButton1Down:Connect(function()
+						ColorPickerToggle["c1"]["Visible"] = not ColorPickerToggle["c1"]["Visible"]
+						ColorPickerToggle.opened = ColorPickerToggle["c1"]["Visible"]
+					end)
+					
+					ColorPickerToggle["d8"].MouseButton1Down:Connect(function()
+						ColorPickerToggle["c1"]["Visible"] = false;
+						ColorPickerToggle.opened = ColorPickerToggle["c1"]["Visible"]
+					end)
+
+					uis.InputBegan:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 and ColorPickerToggle.Hover then
+							ColorPickerToggle.MouseDown = true
+							EraLibrary:tween(ColorPickerToggle["71"], {Color = Color3.fromRGB(102, 102, 102)})
+							ColorPickerToggle:Toggle()
+
+						end
+					end)
+
+					uis.InputEnded:Connect(function(input, gpe)
+						if gpe then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 then
+							ColorPickerToggle.MouseDown = false
+
+							if ColorPickerToggle.Hover then 
+								EraLibrary:tween(ColorPickerToggle["71"], {Color = Color3.fromRGB(81, 81, 81)})
+							else
+								EraLibrary:tween(ColorPickerToggle["71"], {Color = Color3.fromRGB(81, 81, 81)})
+							end
+						end
+					end)
+					
+					game:GetService("UserInputService").InputEnded:Connect(function(input, gameProcessed) if input.UserInputType == Enum.UserInputType.MouseButton1 then 
+							ColorPickerToggle.mainDragging = false
+							ColorPickerToggle.sliderDragging = false
+						end end)
+					ColorPickerToggle["c3"].MouseButton1Down:Connect(function()
+						if ColorPickerToggle.opened then
+							ColorPickerToggle.mainDragging = true 
+						end
+					end)
+					
+					ColorPickerToggle["c5"].MouseButton1Down:Connect(function()
+						if ColorPickerToggle.opened then
+							ColorPickerToggle.mainDragging = true 
+						end
+					end)
+					ColorPickerToggle["cb"].MouseButton1Down:Connect(function()
+						ColorPickerToggle.sliderDragging = true 
+					end)
+					ColorPickerToggle["cd"].MouseButton1Down:Connect(function()
+						ColorPickerToggle.sliderDragging = true 
+					end)
+					
+					local h,s,v = ColorPickerToggle.Color:ToHSV()
+					local color = Color3.fromHSV(h,s,v) 
+					local function setDisplay()
+						--Main
+						ColorPickerToggle["c5"].Position = UDim2.new(s,-ColorPickerToggle["c5"].AbsoluteSize.X/2,1-v,-ColorPickerToggle["c5"].AbsoluteSize.Y/2)
+						ColorPickerToggle["c5"].ImageColor3 = Color3.fromHSV(h,s,v)
+						ColorPickerToggle["c2"].BackgroundColor3 = Color3.fromHSV(h,1,1)
+						ColorPickerToggle["c7"].BackgroundColor3 = Color3.fromHSV(h,s,v)
+						--Slider 
+						local x = h * ColorPickerToggle["cb"].AbsoluteSize.X
+						ColorPickerToggle["cd"].Position = UDim2.new(0,x-ColorPickerToggle["cd"].AbsoluteSize.X/2,0.5,0)
+						ColorPickerToggle["cd"].ImageColor3 = Color3.fromHSV(h,1,1)
+						local color = Color3.fromHSV(h,s,v) 
+						local r,g,b = math.floor((color.R*255)+0.5),math.floor((color.G*255)+0.5),math.floor((color.B*255)+0.5)
+
+					end
+					setDisplay()
+					
+					runService.RenderStepped:connect(function()
+						if ColorPickerToggle.mainDragging then 
+							local localX = math.clamp(mouse.X-ColorPickerToggle["c3"].AbsolutePosition.X,0,ColorPickerToggle["c3"].AbsoluteSize.X)
+							local localY = math.clamp(mouse.Y-ColorPickerToggle["c3"].AbsolutePosition.Y,0,ColorPickerToggle["c3"].AbsoluteSize.Y)
+							ColorPickerToggle["c5"].Position = UDim2.new(0,localX-ColorPickerToggle["c5"].AbsoluteSize.X/2,0,localY-ColorPickerToggle["c5"].AbsoluteSize.Y/2)
+							s = localX / ColorPickerToggle["c3"].AbsoluteSize.X
+							v = 1 - (localY / ColorPickerToggle["c3"].AbsoluteSize.Y)
+							ColorPickerToggle["c7"].BackgroundColor3 = Color3.fromHSV(h,s,v)
+							ColorPickerToggle["c5"].ImageColor3 = Color3.fromHSV(h,s,v)
+							ColorPickerToggle["c2"].BackgroundColor3 = Color3.fromHSV(h,1,1)
+							local color = Color3.fromHSV(h,s,v) 
+							local r,g,b = math.floor((color.R*255)+0.5),math.floor((color.G*255)+0.5),math.floor((color.B*255)+0.5)
+
+							local Success, Response = pcall(function()
+								options.callback({ColorPickerToggle.State, Color3.fromHSV(h,s,v)})
+							end)
+							if not Success then
+								EraLibrary:NotifyErrors(tostring(Response))
+							end
+							
+							ColorPickerToggle.Color = Color3.fromRGB(r,g,b)
+							ColorPickerToggle["73"]["BackgroundColor3"] = ColorPickerToggle.Color
+						end
+						if  ColorPickerToggle.sliderDragging then 
+							local localX = math.clamp(mouse.X-ColorPickerToggle["cb"].AbsolutePosition.X,0,ColorPickerToggle["cb"].AbsoluteSize.X)
+							h = localX / ColorPickerToggle["cb"].AbsoluteSize.X
+							ColorPickerToggle["c7"].BackgroundColor3 = Color3.fromHSV(h,s,v)
+							ColorPickerToggle["cd"].Position = UDim2.new(0,localX-ColorPickerToggle["cd"].AbsoluteSize.X/2,0.5,0)
+							ColorPickerToggle["cd"].ImageColor3 = Color3.fromHSV(h,1,1)
+							ColorPickerToggle["c2"].BackgroundColor3 = Color3.fromHSV(h,1,1)
+							ColorPickerToggle["c5"].ImageColor3 = Color3.fromHSV(h,s,v)
+							local color = Color3.fromHSV(h,s,v) 
+							local r,g,b = math.floor((color.R*255)+0.5),math.floor((color.G*255)+0.5),math.floor((color.B*255)+0.5)
+
+							local Success, Response = pcall(function()
+								options.callback({ColorPickerToggle.State, Color3.fromHSV(h,s,v)})
+							end)
+							if not Success then
+								EraLibrary:NotifyErrors(tostring(Response))
+							end
+							
+							ColorPickerToggle.Color = Color3.fromRGB(r,g,b)
+							ColorPickerToggle["73"]["BackgroundColor3"] = ColorPickerToggle.Color
+						end
+						 
+					end)
+					
+				end
+				
+				
+				AddDraggingFunctionality(ColorPickerToggle["c1"], ColorPickerToggle["c1"])
+				
+				return ColorPickerToggle
+			end
+			
+			function SubTab:CreateSlider(options)
+				options = EraLibrary:validate({
+					name = "No name",
+					minValue = 50,
+					maxValue = 100,
+					default = 90,
+					callback = function(v) end
+				}, options or {})
+				
+				local Slider = {
+					MouseDown = false,	
+					Hover = false,
+					Connection = nil,
+				};
+				
+				--Render
+				do
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider
+					Slider["39"] = Instance.new("Frame", SubTab["25"]);
+					Slider["39"]["BorderSizePixel"] = 0;
+					Slider["39"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Slider["39"]["Size"] = UDim2.new(1, 0, 0, 32);
+					Slider["39"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Slider["39"]["Name"] = [[Slider]];
+					Slider["39"]["BackgroundTransparency"] = 1;
+
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider.SliderBack
+					Slider["3a"] = Instance.new("Frame", Slider["39"]);
+					Slider["3a"]["BorderSizePixel"] = 0;
+					Slider["3a"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30);
+					Slider["3a"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					Slider["3a"]["Size"] = UDim2.new(1, 0, 0, 12);
+					Slider["3a"]["Position"] = UDim2.new(0.5, 0, 0.65, 0);
+					Slider["3a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Slider["3a"]["Name"] = [[SliderBack]];
+
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider.SliderBack.Draggable
+					Slider["3b"] = Instance.new("Frame", Slider["3a"]);
+					Slider["3b"]["BorderSizePixel"] = 0;
+					Slider["3b"]["BackgroundColor3"] = Color3.fromRGB(222, 222, 222);
+					Slider["3b"]["AnchorPoint"] = Vector2.new(0, 0.5);
+					Slider["3b"]["Size"] = UDim2.new(0.7, 0, 1, 0);
+					Slider["3b"]["Position"] = UDim2.new(0, 0, 0.5, 0);
+					Slider["3b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Slider["3b"]["Name"] = [[Draggable]];
+
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider.SliderBack.Draggable.UIGradient
+					Slider["3c"] = Instance.new("UIGradient", Slider["3b"]);
+					Slider["3c"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(255, 255, 255)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(82, 82, 82))};
+
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider.SliderBack.UIStroke
+					Slider["3d"] = Instance.new("UIStroke", Slider["3a"]);
+					Slider["3d"]["Color"] = Color3.fromRGB(71, 71, 71);
+
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider.Value
+					Slider["3e"] = Instance.new("TextLabel", Slider["39"]);
+					Slider["3e"]["TextWrapped"] = true;
+					Slider["3e"]["BorderSizePixel"] = 0;
+					Slider["3e"]["TextXAlignment"] = Enum.TextXAlignment.Right;
+					Slider["3e"]["TextScaled"] = true;
+					Slider["3e"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Slider["3e"]["TextSize"] = 14;
+					Slider["3e"]["FontFace"] = Font.new([[rbxasset://fonts/families/SourceSansPro.json]], Enum.FontWeight.Regular, Enum.FontStyle.Normal);
+					Slider["3e"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
+					Slider["3e"]["BackgroundTransparency"] = 1;
+					Slider["3e"]["AnchorPoint"] = Vector2.new(1, 0.5);
+					Slider["3e"]["Size"] = UDim2.new(0, 35, 0, 15);
+					Slider["3e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Slider["3e"]["Text"] = options.default;
+					Slider["3e"]["Name"] = [[Value]];
+					Slider["3e"]["Position"] = UDim2.new(0.99733, 0, 0.21875, 0);
+
+					-- StarterSlider.EraHubSlider.main.ContentContainer.HomeTab.SubTab1.Slider.Title
+					Slider["3f"] = Instance.new("TextLabel", Slider["39"]);
+					Slider["3f"]["TextWrapped"] = true;
+					Slider["3f"]["BorderSizePixel"] = 0;
+					Slider["3f"]["AutoLocalize"] = false;
+					Slider["3f"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					Slider["3f"]["TextScaled"] = true;
+					Slider["3f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Slider["3f"]["TextSize"] = 14;
+					Slider["3f"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Slider["3f"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					Slider["3f"]["BackgroundTransparency"] = 1;
+					Slider["3f"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					Slider["3f"]["Size"] = UDim2.new(1, 0, 0, 14);
+					Slider["3f"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Slider["3f"]["Text"] = options.name;
+					Slider["3f"]["Name"] = [[Title]];
+					Slider["3f"]["Position"] = UDim2.new(0.496, 0, 0.21875, 0);
+				end
+				
+				--Methods
+				
+				do
+					function Slider:SetValue(v)
+						if v == nil then
+							local percentage = math.clamp((mouse.X - Slider["39"].AbsolutePosition.X) / Slider["39"].AbsoluteSize.X, 0, 1)
+							local value = math.floor(((options.maxValue - options.minValue) * percentage) + options.minValue)
+
+							Slider["3e"].Text = tostring(value)
+							--Slider["3b"].Size = UDim2.new(percentage, 0, 1, 0)
+							--EraLibrary:tween(Slider["3b"], {Size = UDim2.new(percentage, 0, 1, 0)})
+							tweenService:Create(Slider["3b"], TweenInfo.new(0.12, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Size = UDim2.new(percentage, 0, 1, 0)}):Play()
+						else
+							Slider["3e"].Text = tostring(v)
+							--Slider["3b"].Size = UDim2.new(((v - options.minValue) / (options.maxValue - options.minValue)), 0, 1, 0)
+							EraLibrary:tween(Slider["3b"], {Size = UDim2.new(((v - options.minValue) / (options.maxValue - options.minValue)), 0, 1, 0)})
+						end
+						
+						local Success, Response = pcall(function()
+							options.callback(Slider:GetValue())
+						end)
+						if not Success then
+							EraLibrary:NotifyErrors(tostring(Response))
+						end
+					end
+				end
+				
+				function Slider:GetValue()
+					return tonumber(Slider["3e"].Text)
+				end
+				
+				--Logic
+				do
+					do
+						Slider["39"].MouseEnter:Connect(function()
+							Slider.Hover = true
+
+							EraLibrary:tween(Slider["3d"], {Color = Color3.fromRGB(121,121,121)})
+
+						end)
+
+						Slider["39"].MouseLeave:Connect(function()
+							Slider.Hover = false
+
+							if not Slider.MouseDown then
+								EraLibrary:tween(Slider["3d"], {Color = Color3.fromRGB(71, 71, 71)})
+
+							end
+						end)
+
+						uis.InputBegan:Connect(function(input, gpe)
+							if gpe then return end
+
+							if input.UserInputType == Enum.UserInputType.MouseButton1 and Slider.Hover then
+								Slider.MouseDown = true
+								EraLibrary:tween(Slider["3a"], {BackgroundColor3 = Color3.fromRGB(40, 40, 40)})
+								EraLibrary:tween(Slider["3d"], {Color = Color3.fromRGB(150, 150, 150)})
+
+
+								if not Slider.Connection then 
+									Slider.Connection = runService.RenderStepped:Connect(function()
+										Slider:SetValue()
+									end)
+								end
+							end
+						end)
+
+						uis.InputEnded:Connect(function(input, gpe)
+							if gpe then return end
+
+							if input.UserInputType == Enum.UserInputType.MouseButton1 then
+								Slider.MouseDown = false
+
+								if Slider.Hover then 
+									EraLibrary:tween(Slider["3d"], {Color = Color3.fromRGB(71, 71, 71)})
+									EraLibrary:tween(Slider["3a"], {BackgroundColor3 = Color3.fromRGB(29, 29, 29)})
+								else
+									EraLibrary:tween(Slider["3d"], {Color = Color3.fromRGB(71, 71, 71)})
+									EraLibrary:tween(Slider["3a"], {BackgroundColor3 = Color3.fromRGB(29, 29, 29)})
+
+								end
+
+							if Slider.Connection then Slider.Connection:Disconnect() end
+								Slider.Connection = nil
+							end
+						end)
+					end
+				end
+				
+				
+				Slider:SetValue(options.default)
+				return Slider;
+			end
+			
+			function SubTab:CreateDropdown(options)
+				options = EraLibrary:validate({
+					name = "No name",
+					items = {},
+					callback = function(v) end
+				}, options or {})
+				
+				local Dropdown = {
+					Items = {
+						["id"] = {
+							"value"
+						}
+					},
+					Open = false,
+					MouseDown = false,
+					Hover = false,
+					HoveringItem = false
+				};
+				
+				--Render
+				do
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed
+					Dropdown["57"] = Instance.new("Frame", SubTab["25"]);
+					Dropdown["57"]["BorderSizePixel"] = 0;
+					Dropdown["57"]["BackgroundColor3"] = Color3.fromRGB(35, 35, 35);
+					Dropdown["57"]["ClipsDescendants"] = true;
+					Dropdown["57"]["Size"] = UDim2.new(1, 0, 0, 20);
+					Dropdown["57"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Dropdown["57"]["Name"] = [[DropDownClosed]];
+					
+
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed.UIStroke
+					Dropdown["58"] = Instance.new("UIStroke", Dropdown["57"]);
+					Dropdown["58"]["Color"] = Color3.fromRGB(81, 81, 81);
+
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed.Title
+					Dropdown["59"] = Instance.new("TextLabel", Dropdown["57"]);
+					Dropdown["59"]["TextWrapped"] = true;
+					Dropdown["59"]["BorderSizePixel"] = 0;
+					Dropdown["59"]["AutoLocalize"] = false;
+					Dropdown["59"]["TextXAlignment"] = Enum.TextXAlignment.Left;
+					Dropdown["59"]["TextScaled"] = true;
+					Dropdown["59"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Dropdown["59"]["TextSize"] = 14;
+					Dropdown["59"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Dropdown["59"]["TextColor3"] = Color3.fromRGB(241, 241, 241);
+					Dropdown["59"]["BackgroundTransparency"] = 1;
+					Dropdown["59"]["AnchorPoint"] = Vector2.new(0.5, 0.5);
+					Dropdown["59"]["Size"] = UDim2.new(0.8, 0, 0, 14);
+					Dropdown["59"]["ClipsDescendants"] = true;
+					Dropdown["59"]["BorderColor3"] = Color3.fromRGB(28, 43, 54);
+					Dropdown["59"]["Text"] = options.name;
+					Dropdown["59"]["Name"] = [[Title]];
+					Dropdown["59"]["Position"] = UDim2.new(0, 82, 0, 10);
+
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed.Icon
+					Dropdown["5a"] = Instance.new("ImageLabel", Dropdown["57"]);
+					Dropdown["5a"]["BorderSizePixel"] = 0;
+					Dropdown["5a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Dropdown["5a"]["ImageColor3"] = Color3.fromRGB(222, 222, 222);
+					Dropdown["5a"]["AnchorPoint"] = Vector2.new(1, 0);
+					Dropdown["5a"]["Image"] = [[http://www.roblox.com/asset/?id=17744408266]];
+					Dropdown["5a"]["Size"] = UDim2.new(0, 15, 0, 15);
+					Dropdown["5a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Dropdown["5a"]["BackgroundTransparency"] = 1;
+					Dropdown["5a"]["Name"] = [[Icon]];
+					Dropdown["5a"]["Position"] = UDim2.new(0, 192, 0, 2);
+
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed.OptionsHolder
+					Dropdown["5b"] = Instance.new("ScrollingFrame", Dropdown["57"]);
+					Dropdown["5b"]["Active"] = false;
+					Dropdown["5b"]["ScrollingDirection"] = Enum.ScrollingDirection.Y;
+					Dropdown["5b"]["BorderSizePixel"] = 0;
+					Dropdown["5b"]["CanvasSize"] = UDim2.new(0, 0, 0, 0);
+					Dropdown["5b"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Dropdown["5b"]["Name"] = [[OptionsHolder]];
+					Dropdown["5b"]["AutomaticCanvasSize"] = "Y";
+					Dropdown["5b"]["Size"] = UDim2.new(1, 0, 0.85, 0);
+					Dropdown["5b"]["ScrollBarImageColor3"] = Color3.fromRGB(0, 0, 0);
+					Dropdown["5b"]["Position"] = UDim2.new(0, 0, 0, 20);
+					Dropdown["5b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Dropdown["5b"]["ScrollBarThickness"] = 0;
+					Dropdown["5b"]["BackgroundTransparency"] = 1;
+					Dropdown["5b"]["ZIndex"] = 2
+					Dropdown["5b"]["ClipsDescendants"] = true
+					
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed.OptionsHolder.UIListLayout
+					Dropdown["5c"] = Instance.new("UIListLayout", Dropdown["5b"]);
+					Dropdown["5c"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center;
+					Dropdown["5c"]["Padding"] = UDim.new(0, 6);
+					Dropdown["5c"]["SortOrder"] = Enum.SortOrder.LayoutOrder;
+
+					-- StarterDropdown.EraHubDropdown.main.ContentContainer.HomeTab.SubTab1.DropDownClosed.OptionsHolder.UIPadding
+					Dropdown["5d"] = Instance.new("UIPadding", Dropdown["5b"]);
+					Dropdown["5d"]["PaddingTop"] = UDim.new(0, 6);
+					Dropdown["5d"]["PaddingRight"] = UDim.new(0, 5);
+					Dropdown["5d"]["PaddingLeft"] = UDim.new(0, 5);
+					Dropdown["5d"]["PaddingBottom"] = UDim.new(0, 5);
+
+					
+				end
+				
+				--Methods
+				
+				do
+					function Dropdown:Toggle()
+						Dropdown.Open = not Dropdown.Open
+
+						if not Dropdown.Open then
+							Dropdown["5b"].Visible = false
+							EraLibrary:tween(Dropdown["57"], {Size = UDim2.new(1, 0, 0, 20)})
+						else
+							local count = 0
+							for i, v in pairs(Dropdown.Items) do
+								if v ~= nil  then
+									count += 1
+								end
+							end
+
+						
+							local Ysize = 20 + (count * 22) + 8 
+
+							if Ysize > 138 then
+								Ysize = 138
+							end
+
+							Dropdown["5b"].Visible = true
+							EraLibrary:tween(Dropdown["57"], {Size = UDim2.new(1, 0, 0, Ysize)})
+							
+						end
+					end
+				end
+				
+				function Dropdown:Add(id , value)
+
+					local Item = {
+						Hover = false,
+						MouseDown = false,
+					}
+
+					if Dropdown.Items[id] ~= nil  then
+						return
+					end
+
+					Dropdown.Items[id] = {
+						instance = {},
+						value = value
+					}
+					Dropdown.Items[id].instance = {}				
+					Dropdown.Items[id].value = value
+					-- StarterGui.Library.Main.ContentContainer.HomeTab.Dropdown.OptionHolder.Inactive Option
+					-- StarterDropdown.Items[id].instance.EraHubDropdown.Items[id].instance.main.ContentContainer.HomeTab.SubTab2.DropDownOpened.OptionsHolder.InactiveOption
+					Dropdown.Items[id].instance["4a"] = Instance.new("TextLabel", Dropdown["5b"]);
+					Dropdown.Items[id].instance["4a"]["TextWrapped"] = true;
+					Dropdown.Items[id].instance["4a"]["BorderSizePixel"] = 0;
+					Dropdown.Items[id].instance["4a"]["BackgroundColor3"] = Color3.fromRGB(31, 31, 31);
+					Dropdown.Items[id].instance["4a"]["TextSize"] = 14;
+					Dropdown.Items[id].instance["4a"]["FontFace"] = Font.new([[rbxasset://fonts/families/GothamSSm.json]], Enum.FontWeight.Medium, Enum.FontStyle.Normal);
+					Dropdown.Items[id].instance["4a"]["TextColor3"] = Color3.fromRGB(255, 255, 255);
+					Dropdown.Items[id].instance["4a"]["Size"] = UDim2.new(1, 0, 0, 22);
+					Dropdown.Items[id].instance["4a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Dropdown.Items[id].instance["4a"]["Text"] = id;
+					Dropdown.Items[id].instance["4a"]["Name"] = id;
+					
+					-- StarterDropdown.Items[id].instance.EraHubDropdown.Items[id].instance.main.ContentContainer.HomeTab.SubTab2.DropDownOpened.OptionsHolder.InactiveOption.UIStroke
+					Dropdown.Items[id].instance["4b"] = Instance.new("UIStroke", Dropdown.Items[id].instance["4a"]);
+					Dropdown.Items[id].instance["4b"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border;
+					Dropdown.Items[id].instance["4b"]["Color"] = Color3.fromRGB(71, 71, 71);
+					
+					-- StarterDropdown.Items[id].instance.EraHubDropdown.Items[id].instance.main.ContentContainer.HomeTab.SubTab2.DropDownOpened.OptionsHolder.InactiveOption.line
+					Dropdown.Items[id].instance["9a"] = Instance.new("Frame", Dropdown.Items[id].instance["4a"]);
+					Dropdown.Items[id].instance["9a"]["BorderSizePixel"] = 0;
+					Dropdown.Items[id].instance["9a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+					Dropdown.Items[id].instance["9a"]["AnchorPoint"] = Vector2.new(0.5, 1);
+					Dropdown.Items[id].instance["9a"]["Size"] = UDim2.new(0, 130, 0, 2);
+					Dropdown.Items[id].instance["9a"]["Position"] = UDim2.new(0.5, 0, 0.9, 0);
+					Dropdown.Items[id].instance["9a"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
+					Dropdown.Items[id].instance["9a"]["Name"] = [[line]];
+
+					-- StarterDropdown.Items[id].instance.EraHubDropdown.Items[id].instance.main.ContentContainer.HomeTab.SubTab2.DropDownOpened.OptionsHolder.InactiveOption.line.UIGradient
+					Dropdown.Items[id].instance["9b"] = Instance.new("UIGradient", Dropdown.Items[id].instance["9a"]);
+					Dropdown.Items[id].instance["9b"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.100, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(105, 105, 105)),ColorSequenceKeypoint.new(0.900, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(31, 31, 31))};
+
+
+
+					Dropdown.Items[id].instance["4a"].MouseEnter:Connect(function()
+						Item.Hover = true
+						Dropdown.HoveringItem = true
+
+						EraLibrary:tween(Dropdown.Items[id].instance["4b"], {Color = Color3.fromRGB(96, 96, 96)})
+						Dropdown.Items[id].instance["9b"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.050, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(151, 151, 151)),ColorSequenceKeypoint.new(0.950, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(31, 31, 31))};
+
+					end)
+					
+					Dropdown.Items[id].instance["4a"].MouseLeave:Connect(function()
+						Item.Hover = false
+						Dropdown.HoveringItem = false
+					
+						if not Item.MouseDown then
+							EraLibrary:tween(Dropdown.Items[id].instance["4b"], {Color = Color3.fromRGB(71, 71, 71)})
+							Dropdown.Items[id].instance["9b"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.100, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(105, 105, 105)),ColorSequenceKeypoint.new(0.900, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(31, 31, 31))};
+						end
+					end)
+					
+					uis.InputBegan:Connect(function(input, gpe)
+						if gpe then return end
+
+						if Dropdown.Items[id] == nil then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 and Item.Hover then
+							Item.MouseDown = true
+							EraLibrary:tween(Dropdown.Items[id].instance["4a"], {BackgroundColor3 = Color3.fromRGB(30, 30, 30)})
+							EraLibrary:tween(Dropdown.Items[id].instance["4b"], {Color = Color3.fromRGB(121, 121, 121)})
+						
+							
+							local Success, Response = pcall(function()
+								options.callback(id)
+							end)
+							if not Success then
+								EraLibrary:NotifyErrors(tostring(Response))
+							end
+							--Dropdown:Toggle()
+							Dropdown["59"]["Text"] = options.name .. "    " .."("..id..")"
+						end
+					end)
+
+					uis.InputEnded:Connect(function(input, gpe)
+						if gpe then return end
+
+						if Dropdown.Items[id] == nil then return end
+
+						if input.UserInputType == Enum.UserInputType.MouseButton1 then
+							Item.MouseDown = false
+
+							if Item.Hover then 
+								EraLibrary:tween(Dropdown.Items[id].instance["4a"], {BackgroundColor3 = Color3.fromRGB(30, 30, 30)})
+								Dropdown.Items[id].instance["9b"]["Color"] = ColorSequence.new{ColorSequenceKeypoint.new(0.000, Color3.fromRGB(31, 31, 31)),ColorSequenceKeypoint.new(0.500, Color3.fromRGB(222, 222, 222)),ColorSequenceKeypoint.new(1.000, Color3.fromRGB(31, 31, 31))};
+								EraLibrary:tween(Dropdown.Items[id].instance["4b"], {Color = Color3.fromRGB(116, 116, 116)})
+							end
+						end
+					end)
+				end
+				
+				for _, value in pairs(options.items) do
+					Dropdown:Add(value)
+				end
+
+				--Other Methods
+
+				function Dropdown:Refresh(id)
+					Dropdown:Clear()
+					for _, value in pairs(id) do
+						Dropdown:Add(value)
+					end
+				end
+
+				function Dropdown:Remove(id)
+					if Dropdown.Items[id] ~= nil then
+						if Dropdown.Items[id].instance ~= nil then
+							for i , v in pairs(Dropdown.Items[id].instance) do
+								v:Destroy()
+							end
+						end
+						Dropdown.Items[id] = nil
+					end
+				end
+
+				function Dropdown:Clear()
+					for i, v in pairs (Dropdown.Items) do
+						Dropdown:Remove(i)
+					end
+				end
+				
+				--Logic 
+				do
+					do
+						Dropdown["57"].MouseEnter:Connect(function()
+							Dropdown.Hover = true
+
+							EraLibrary:tween(Dropdown["58"], {Color = Color3.fromRGB(123,123,123)})
+
+						end)
+
+						Dropdown["57"].MouseLeave:Connect(function()
+							Dropdown.Hover = false
+
+							if not Dropdown.MouseDown then
+								EraLibrary:tween(Dropdown["58"], {Color = Color3.fromRGB(81, 81, 81)})
+							end
+						end)
+
+						uis.InputBegan:Connect(function(input, gpe)
+							if gpe then return end
+
+							if input.UserInputType == Enum.UserInputType.MouseButton1 and Dropdown.Hover then
+								Dropdown.MouseDown = true
+								EraLibrary:tween(Dropdown["57"], {BackgroundColor3 = Color3.fromRGB(50, 50, 50)})
+								EraLibrary:tween(Dropdown["58"], {Color = Color3.fromRGB(150, 150, 150)})
+
+								if not Dropdown.HoveringItem  then
+									Dropdown:Toggle()
+								end
+							end
+						end)
+
+						uis.InputEnded:Connect(function(input, gpe)
+							if gpe then return end
+
+							if input.UserInputType == Enum.UserInputType.MouseButton1 then
+								Dropdown.MouseDown = false
+
+								if Dropdown.Hover then 
+									EraLibrary:tween(Dropdown["57"], {BackgroundColor3 = Color3.fromRGB(34, 34, 34)})
+									EraLibrary:tween(Dropdown["58"], {Color = Color3.fromRGB(102,102,102)})
+								else
+									EraLibrary:tween(Dropdown["57"], {BackgroundColor3 = Color3.fromRGB(34, 34, 34)})
+									EraLibrary:tween(Dropdown["58"], {Color = Color3.fromRGB(149, 149, 149)})
+								end
+							end
+						end)
+					end
+				end
+				
+				
+				return Dropdown
+			end
+			
+			
+			return SubTab
+		end
+		
+		return Tab
+	end
+	
+	--Other
+	
+	function EraGui:Close(bool)
+		EraGui["2"].Visible = bool
+		EraGui.Openned = bool
+	end
+	
+	uis.InputBegan:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.RightControl  then
+			EraGui:Close(not EraGui.Openned)
+		end
+	end)
+	
+	EraGui["9"].MouseButton1Down:Connect(function()
+		EraGui:Close(false)
+	end)
+	
+	EraGui["6"].MouseButton1Down:Connect(function()
+		
+		if not EraGui.Minimized then
+			EraLibrary:tween(EraGui["2"], {Size = UDim2.new(0, 530, 0, 26)})
+			EraGui["21"]["Visible"] = false
+			EraGui["c"]["Visible"] = false
+			EraGui["bf"]["Visible"] = false
+			EraGui.Minimized = true
+		else
+			EraLibrary:tween(EraGui["2"], {Size = UDim2.new(0, 530, 0, 330)})
+			EraGui["21"]["Visible"] = true
+			EraGui["c"]["Visible"] = true
+			EraGui["bf"]["Visible"] = true
+			EraGui.Minimized = false 
+		end
+		
+
+	end)
+	
+	
+	AddDraggingFunctionality(EraGui["222"], EraGui["2"])
+	
+	return EraGui
+end
