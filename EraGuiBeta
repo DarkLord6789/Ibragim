@@ -8,7 +8,7 @@ local HttpService = game:GetService("HttpService")
 
 
 if not game["Run Service"]:IsStudio() then
-	if coreGui:FindFirstChild("EraHub") then
+	if coreGui.FindFirstChild("EraHub") then
 		coreGui.EraHub:Destroy()
 	end
 end
@@ -455,6 +455,7 @@ function EraLibrary:CreateWin(options)
 			Tab["22"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 			Tab["22"]["ScrollBarThickness"] = 0;
 			Tab["22"]["BackgroundTransparency"] = 1;
+			Tab["22"]["Visible"] = false
 
 			-- StarterEraGui.EraHubEraGui.main.ContentContainer.HomeTab.UIListLayout
 			Tab["23"] = Instance.new("UIListLayout", Tab["22"]);
@@ -2522,3 +2523,4 @@ function EraLibrary:CreateWin(options)
 end
 
 return EraLibrary
+
