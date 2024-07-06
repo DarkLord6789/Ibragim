@@ -8,7 +8,7 @@ local HttpService = game:GetService("HttpService")
 
 
 if not game["Run Service"]:IsStudio() then
-	if coreGui.FindFirstChild("EraHub") then
+	if coreGui:FindFirstChild("EraHub") then
 		coreGui.EraHub:Destroy()
 	end
 end
