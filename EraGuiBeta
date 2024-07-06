@@ -7,6 +7,15 @@ local coreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
 
 
+if not game["Run Service"]:IsStudio() then
+	if coreGui.FindFirstChild("EraHub") then
+		coreGui.EraHub:Destroy()
+	end
+end
+
+
+
+
 --vars
 local lp = players.LocalPlayer
 local mouse = lp:GetMouse()
@@ -339,7 +348,7 @@ function EraLibrary:CreateWin(options)
 		EraGui["1b"]["ImageColor3"] = Color3.fromRGB(231, 231, 231);
 		EraGui["1b"]["AnchorPoint"] = Vector2.new(1, 0.5);
 		EraGui["1b"]["Image"] = [[http://www.roblox.com/asset/?id=18261861440]];
-		EraGui["1b"]["Size"] = UDim2.new(0, 20, 0, 20);
+		EraGui["1b"]["Size"] = UDim2.new(0, 19, 0, 19);
 		EraGui["1b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 		EraGui["1b"]["BackgroundTransparency"] = 1;
 		EraGui["1b"]["Name"] = [[SettingsButton]];
@@ -845,6 +854,7 @@ function EraLibrary:CreateWin(options)
 					Label["2a"]["TextWrapped"] = true;
 					Label["2a"]["BorderSizePixel"] = 0;
 					Label["2a"]["AutoLocalize"] = false;
+					Label["2a"]["RichText"] = true
 					Label["2a"]["TextXAlignment"] = Enum.TextXAlignment.Left;
 					Label["2a"]["TextScaled"] = false;
 					Label["2a"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
@@ -2470,6 +2480,16 @@ function EraLibrary:CreateWin(options)
 		if input.KeyCode == Enum.KeyCode.RightControl  then
 			EraGui:Close(not EraGui.Openned)
 		end
+	end)
+	
+	EraGui["1b"].MouseEnter:Connect(function()
+		EraLibrary:tween(EraGui["1b"], {ImageColor3 = Color3.fromRGB(255,255,255)})
+		tweenService:Create(EraGui["1b"], TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Rotation = 45}):Play()
+	end)
+	
+	EraGui["1b"].MouseLeave:Connect(function()
+		EraLibrary:tween(EraGui["1b"], {ImageColor3 = Color3.fromRGB(231, 231, 231)})
+		tweenService:Create(EraGui["1b"], TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Rotation = 0}):Play()
 	end)
 	
 	EraGui["9"].MouseButton1Down:Connect(function()
