@@ -2500,3 +2500,5 @@ function EraLibrary:CreateWin(options)
 	
 	return EraGui
 end
+
+return EraLibrary
